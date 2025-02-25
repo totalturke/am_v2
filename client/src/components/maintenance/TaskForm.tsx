@@ -88,7 +88,7 @@ export default function TaskForm({ open, onClose, taskType = 'corrective', initi
       reportedBy: taskType === 'corrective' ? "Guest" : "System",
       priority: taskType === 'corrective' ? "medium" : "low",
       status: taskType === 'corrective' ? "pending" : "scheduled",
-      assignedTo: "",
+      assignedTo: "unassigned",
       estimatedDuration: "",
     },
   });
@@ -107,7 +107,7 @@ export default function TaskForm({ open, onClose, taskType = 'corrective', initi
       return apiRequest("POST", "/api/tasks", {
         ...data,
         apartmentId: parseInt(data.apartmentId),
-        assignedTo: data.assignedTo ? parseInt(data.assignedTo) : undefined,
+        assignedTo: data.assignedTo && data.assignedTo !== "unassigned" ? parseInt(data.assignedTo) : undefined,
         scheduledFor: data.scheduledFor ? data.scheduledFor.toISOString() : undefined,
       });
     },
@@ -345,7 +345,7 @@ export default function TaskForm({ open, onClose, taskType = 'corrective', initi
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Unassigned</SelectItem>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
                         {agents.map((agent: any) => (
                           <SelectItem key={agent.id} value={agent.id.toString()}>
                             {agent.name}
