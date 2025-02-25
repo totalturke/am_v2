@@ -1,0 +1,86 @@
+Main Objectives of Maintenance
+In the context of renting 700 apartments via Airbnb across multiple cities in Mexico, maintenance is critical to ensure guest satisfaction, safety, and operational efficiency. The main objectives are divided into two categories:
+Corrective Maintenance:
+Purpose: Address immediate issues that disrupt the functionality or safety of the apartments.
+Examples: Fixing a lack of water, replacing a broken light bulb, repairing electrical failures, or addressing broken items.
+Goal: Resolve these issues as quickly as possible to minimize guest inconvenience and maintain Airbnb ratings.
+Preventive Maintenance:
+Purpose: Proactively maintain apartments to prevent issues before they arise, ensuring long-term quality and reducing emergency repairs.
+Frequency: Perform at least two comprehensive reviews per year for each apartment.
+Tasks: Include painting, general cleaning, electronic checks, mattress cleaning, blind cleaning, light bulb replacement, and sensor reviews.
+Goal: Keep apartments in top condition, extend the lifespan of assets, and plan maintenance based on historical data.
+Context of Maintenance
+You manage approximately 700 apartments (referred to as "departments") spread across multiple cities in Mexico. Within each city, there are various condominiums or buildings, and each building contains multiple apartments. These apartments are rented through Airbnb, meaning maintenance must align with guest expectations for cleanliness, functionality, and comfort. The web application you need must provide precise control over both corrective and preventive maintenance, ensuring rapid responses to urgent issues and scheduled upkeep to maintain quality standards.
+Key Processes
+The application must support the following processes, each tailored to corrective or preventive maintenance, plus a purchasing workflow:
+1. Corrective Maintenance Process
+Issue Reporting: Guests or staff report issues (e.g., no water, broken items) through the app or other channels, logging them into the system.
+Task Assignment: The control center assigns tasks to maintenance agents based on urgency, location, and agent availability.
+Execution: Maintenance agents fix the issue and upload evidence (e.g., photos, notes) to document the repair.
+Verification: Control center personnel review the evidence and confirm the task is complete.
+2. Preventive Maintenance Process
+Scheduling: The system schedules maintenance based on historical data and a predefined interval (e.g., every 6 months).
+Initial Diagnosis: A maintenance supervisor visits the apartment, using a checklist to assess its condition (e.g., painting needs, electronic functionality).
+Budget Creation: The supervisor estimates time, labor, and material costs, submitting a budget for approval.
+Approval: Control center personnel review and approve the budget.
+Execution: Maintenance agents perform the tasks and upload evidence of completion.
+Verification and Recording: The control center verifies the work, and the system updates the apartment’s maintenance history, scheduling the next review.
+3. Purchasing Process
+Material Identification: Maintenance tasks generate a list of required materials (e.g., paint, bulbs).
+Estimation: Purchasing agents estimate quantities and costs based on task needs.
+Procurement: Purchase orders are created and tracked within the app until materials are acquired.
+User Roles and Responsibilities
+The application will serve three main user types, each with specific roles:
+Maintenance Agents:
+Execute both corrective and preventive maintenance tasks.
+Collect and upload evidence (e.g., photos, videos) to document completed work.
+View assigned tasks and schedules.
+Control Center Personnel:
+Verify evidence submitted by maintenance agents to ensure tasks are completed correctly.
+Approve budgets and task executions.
+Monitor overall maintenance progress and trends.
+Purchasing Agents:
+Review material requirements from maintenance tasks.
+Estimate quantities and costs for procurement.
+Manage purchase orders and track material delivery.
+Technical Requirements
+To build this web application, several technical components must be considered:
+User Interfaces
+Maintenance Agents:
+Dashboard showing assigned tasks (corrective and preventive).
+Tools to upload evidence and mark tasks as complete.
+Mobile-friendly design for fieldwork.
+Control Center Personnel:
+Dashboard for task verification, budget approval, and progress monitoring.
+Reporting tools for maintenance trends (e.g., frequent issues by building).
+Purchasing Agents:
+Interface to view material needs and create purchase orders.
+Inventory tracking features.
+Database Structure
+The database must support the hierarchical structure and maintenance tracking:
+Cities: List of cities in Mexico with apartments.
+Buildings/Condominiums: Buildings within each city.
+Apartments: Individual units within buildings (700 total).
+Maintenance Tasks: Records of corrective and preventive tasks, linked to apartments.
+Maintenance History: Past maintenance details (dates, costs, evidence).
+Users: Profiles with roles (maintenance agents, control center, purchasing agents).
+Materials and Inventory: Tracking of materials used and available stock.
+Budgets and Approvals: Records of budget proposals and their statuses.
+Workflow Management
+Automate task assignment for corrective maintenance based on agent availability.
+Schedule preventive maintenance with reminders and historical triggers.
+Support budget submission, review, and approval workflows.
+Enable evidence upload and verification processes.
+Scalability and Usability
+Scalability: Handle 700 apartments with room for growth across multiple cities.
+Usability: Intuitive design for users with varying technical skills, including a mobile-friendly interface for agents.
+Artificial Intelligence Integration
+AI can enhance the application by optimizing maintenance operations:
+Predictive Maintenance:
+Analyze historical data to predict when preventive maintenance is needed (e.g., frequent bulb replacements in certain buildings).
+Optimized Scheduling:
+Use AI to schedule tasks, minimizing apartment downtime and optimizing agent travel between locations.
+Automated Task Assignment:
+Assign corrective tasks to agents based on their skills, proximity, and current workload.
+Issue Analysis:
+Identify recurring issues (e.g., plumbing problems in specific buildings) to inform preventive strategies or upgrades.
