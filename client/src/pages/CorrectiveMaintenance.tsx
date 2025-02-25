@@ -158,7 +158,7 @@ export default function CorrectiveMaintenance() {
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Statuses</SelectItem>
+                    <SelectItem value="all_statuses">All Statuses</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="in_progress">In Progress</SelectItem>
                     <SelectItem value="complete">Complete</SelectItem>
@@ -171,7 +171,7 @@ export default function CorrectiveMaintenance() {
                     <SelectValue placeholder="City" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Cities</SelectItem>
+                    <SelectItem value="all_cities">All Cities</SelectItem>
                     {cities.map((city: any) => (
                       <SelectItem key={city.id} value={city.id.toString()}>
                         {city.name}

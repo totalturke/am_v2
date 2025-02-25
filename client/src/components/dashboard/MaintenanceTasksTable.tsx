@@ -120,7 +120,7 @@ export default function MaintenanceTasksTable({ tasks, onAddTask }: MaintenanceT
               <SelectValue placeholder="All Cities" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Cities</SelectItem>
+              <SelectItem value="all_cities">All Cities</SelectItem>
               <SelectItem value="1">Mexico City</SelectItem>
               <SelectItem value="2">Cancún</SelectItem>
               <SelectItem value="3">Guadalajara</SelectItem>
@@ -133,7 +133,7 @@ export default function MaintenanceTasksTable({ tasks, onAddTask }: MaintenanceT
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Types</SelectItem>
+              <SelectItem value="all_types">All Types</SelectItem>
               <SelectItem value="corrective">Corrective</SelectItem>
               <SelectItem value="preventive">Preventive</SelectItem>
             </SelectContent>
