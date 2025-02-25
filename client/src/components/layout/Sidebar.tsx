@@ -27,11 +27,11 @@ const NavItem = ({ href, icon, children, active }: NavItemProps) => {
   return (
     <Link href={href}>
       <a className={cn(
-        "flex items-center px-4 py-3 text-white hover:bg-primary-600",
+        "flex items-center px-4 py-3 text-white hover:bg-primary-600 font-medium",
         active && "bg-primary-600"
       )}>
-        <span className="h-5 w-5 mr-3">{icon}</span>
-        <span>{children}</span>
+        <span className="h-5 w-5 mr-3 text-white">{icon}</span>
+        <span className="text-white">{children}</span>
       </a>
     </Link>
   );
@@ -95,38 +95,38 @@ export default function Sidebar() {
           </div>
           
           <nav className="flex-1 overflow-y-auto pt-4">
-            <div className="px-4 mb-3 text-sm font-medium text-primary-200 uppercase">Main Menu</div>
+            <div className="px-4 mb-3 text-sm font-medium text-primary-200 uppercase">Menú Principal</div>
             
             <NavItem href="/" icon={<Home />} active={location === '/'}>
-              Dashboard
+              Panel de Control
             </NavItem>
 
-            <div className="px-4 mt-6 mb-3 text-sm font-medium text-primary-200 uppercase">Maintenance</div>
+            <div className="px-4 mt-6 mb-3 text-sm font-medium text-primary-200 uppercase">Mantenimiento</div>
             
             <NavItem href="/corrective" icon={<AlertTriangle />} active={location === '/corrective'}>
-              Corrective Maintenance
+              Mantenimiento Correctivo
             </NavItem>
             
             <NavItem href="/preventive" icon={<Clipboard />} active={location === '/preventive'}>
-              Preventive Maintenance
+              Mantenimiento Preventivo
             </NavItem>
             
             <NavItem href="/purchasing" icon={<ShoppingBag />} active={location === '/purchasing'}>
-              Purchasing
+              Compras
             </NavItem>
 
-            <div className="px-4 mt-6 mb-3 text-sm font-medium text-primary-200 uppercase">Organization</div>
+            <div className="px-4 mt-6 mb-3 text-sm font-medium text-primary-200 uppercase">Organización</div>
             
             <NavItem href="/cities" icon={<MapPin />} active={location === '/cities'}>
-              Cities
+              Ciudades
             </NavItem>
             
             <NavItem href="/buildings" icon={<Building />} active={location === '/buildings'}>
-              Buildings
+              Edificios
             </NavItem>
             
             <NavItem href="/apartments" icon={<HomeIcon />} active={location === '/apartments'}>
-              Apartments
+              Apartamentos
             </NavItem>
           </nav>
 

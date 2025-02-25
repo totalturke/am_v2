@@ -20,7 +20,7 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
         <CardContent className="p-6">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-neutral-500">Pending Tasks</p>
+              <p className="text-sm font-medium text-neutral-500">Tareas Pendientes</p>
               <p className="text-2xl font-semibold mt-1">{stats.pendingTasks}</p>
             </div>
             <div className="p-2 bg-primary-100 rounded-lg text-primary-600">
@@ -29,7 +29,7 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
           </div>
           <div className="mt-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-neutral-500">Progress</span>
+              <span className="text-xs text-neutral-500">Progreso</span>
               <span className="text-xs font-medium text-neutral-900">65%</span>
             </div>
             <Progress value={65} className="h-2 mt-1" />
@@ -42,7 +42,7 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
         <CardContent className="p-6">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-neutral-500">Corrective Tasks</p>
+              <p className="text-sm font-medium text-neutral-500">Tareas Correctivas</p>
               <p className="text-2xl font-semibold mt-1">{stats.correctiveTasks}</p>
             </div>
             <div className="p-2 bg-destructive/10 rounded-lg text-destructive">
@@ -51,7 +51,7 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
           </div>
           <div className="mt-4 flex items-center text-xs text-destructive">
             <ChevronUp className="h-4 w-4 mr-1" />
-            <span>4 new since yesterday</span>
+            <span>4 nuevas desde ayer</span>
           </div>
         </CardContent>
       </Card>
@@ -61,7 +61,7 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
         <CardContent className="p-6">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-neutral-500">Preventive Tasks</p>
+              <p className="text-sm font-medium text-neutral-500">Tareas Preventivas</p>
               <p className="text-2xl font-semibold mt-1">{stats.preventiveTasks}</p>
             </div>
             <div className="p-2 bg-green-100 rounded-lg text-green-600">
@@ -70,7 +70,7 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
           </div>
           <div className="mt-4 flex items-center text-xs text-green-600">
             <CheckCircle className="h-4 w-4 mr-1" />
-            <span>On schedule</span>
+            <span>En horario</span>
           </div>
         </CardContent>
       </Card>
@@ -80,7 +80,7 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
         <CardContent className="p-6">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-neutral-500">Active Apartments</p>
+              <p className="text-sm font-medium text-neutral-500">Apartamentos Activos</p>
               <p className="text-2xl font-semibold mt-1">{stats.activeApartments}</p>
             </div>
             <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
@@ -89,7 +89,7 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
           </div>
           <div className="mt-4 flex items-center text-xs text-neutral-600">
             <BarChart className="h-4 w-4 mr-1" />
-            <span>98% of total inventory</span>
+            <span>98% del inventario total</span>
           </div>
         </CardContent>
       </Card>
