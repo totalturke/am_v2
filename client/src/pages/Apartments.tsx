@@ -58,9 +58,9 @@ export default function Apartments() {
   const [isCreating, setIsCreating] = useState(false);
   const [selectedApartment, setSelectedApartment] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [buildingFilter, setBuildingFilter] = useState("");
-  const [cityFilter, setCityFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [buildingFilter, setBuildingFilter] = useState("all_buildings");
+  const [cityFilter, setCityFilter] = useState("all_cities");
+  const [statusFilter, setStatusFilter] = useState("all_status");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -71,7 +71,7 @@ export default function Apartments() {
       const [_, buildingId, cityId, status] = queryKey;
       let url = "/api/apartments";
       
-      if (buildingId) {
+      if (buildingId && buildingId !== "all_buildings") {
         url += `?buildingId=${buildingId}`;
       }
       
@@ -83,11 +83,11 @@ export default function Apartments() {
         // Client-side filtering for city and status
         let filtered = data;
         
-        if (cityId) {
+        if (cityId && cityId !== "all_cities") {
           filtered = filtered.filter((apt: any) => apt.city?.id.toString() === cityId);
         }
         
-        if (status) {
+        if (status && status !== "all_status") {
           filtered = filtered.filter((apt: any) => apt.status === status);
         }
         
@@ -217,7 +217,7 @@ export default function Apartments() {
                     <SelectValue placeholder="All Cities" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Cities</SelectItem>
+                    <SelectItem value="all_cities">All Cities</SelectItem>
                     {cities.map((city: any) => (
                       <SelectItem key={city.id} value={city.id.toString()}>
                         {city.name}
@@ -232,7 +232,7 @@ export default function Apartments() {
                     <SelectValue placeholder="All Buildings" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Buildings</SelectItem>
+                    <SelectItem value="all_buildings">All Buildings</SelectItem>
                     {buildings.map((building: any) => (
                       <SelectItem key={building.id} value={building.id.toString()}>
                         {building.name}
@@ -246,7 +246,7 @@ export default function Apartments() {
                     <SelectValue placeholder="All Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Status</SelectItem>
+                    <SelectItem value="all_status">All Status</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="maintenance">Maintenance</SelectItem>
                     <SelectItem value="inactive">Inactive</SelectItem>

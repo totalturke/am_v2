@@ -164,7 +164,7 @@ export default function Buildings() {
                   <SelectValue placeholder="All Cities" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Cities</SelectItem>
+                  <SelectItem value="all_cities">All Cities</SelectItem>
                   {cities.map((city: any) => (
                     <SelectItem key={city.id} value={city.id.toString()}>
                       {city.name}
