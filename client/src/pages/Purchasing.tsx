@@ -45,7 +45,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Loader2, Plus, Package, ShoppingCart, ArrowDown, Trash, Edit } from "lucide-react";
+import { Loader2, Plus, Package, ShoppingCart, ArrowDown, Trash, Edit, Boxes } from "lucide-react";
 import { format } from "date-fns";
 
 // Form schema for new purchase order
@@ -61,10 +61,19 @@ const purchaseOrderItemSchema = z.object({
   unitPrice: z.number().min(0.01, "Unit price must be greater than 0"),
 });
 
+// Form schema for new material
+const materialSchema = z.object({
+  name: z.string().min(1, "Nombre del material es requerido"),
+  quantity: z.number().min(0, "Cantidad no puede ser negativa"),
+  unit: z.string().min(1, "Unidad de medida es requerida"),
+  notes: z.string().optional(),
+});
+
 export default function Purchasing() {
   const [isCreatingPO, setIsCreatingPO] = useState(false);
   const [selectedPO, setSelectedPO] = useState<any>(null);
   const [isAddingItem, setIsAddingItem] = useState(false);
+  const [isAddingMaterial, setIsAddingMaterial] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -100,6 +109,17 @@ export default function Purchasing() {
       materialId: "",
       quantity: 1,
       unitPrice: 0,
+    },
+  });
+  
+  // New material form
+  const materialForm = useForm<z.infer<typeof materialSchema>>({
+    resolver: zodResolver(materialSchema),
+    defaultValues: {
+      name: "",
+      quantity: 0,
+      unit: "",
+      notes: "",
     },
   });
 
@@ -183,6 +203,34 @@ export default function Purchasing() {
       toast({
         title: "Error",
         description: "Failed to update status. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Create material mutation
+  const createMaterialMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof materialSchema>) => {
+      return apiRequest("POST", "/api/materials", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/materials"] });
+      toast({
+        title: "Material agregado",
+        description: "El nuevo material ha sido agregado al inventario.",
+      });
+      setIsAddingMaterial(false);
+      materialForm.reset({
+        name: "",
+        quantity: 0,
+        unit: "",
+        notes: "",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "No se pudo crear el material. Por favor intente nuevamente.",
         variant: "destructive",
       });
     },
