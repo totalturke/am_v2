@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { AppLayout } from "../App";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import TaskForm from "../components/maintenance/TaskForm";
@@ -185,7 +184,7 @@ export default function PreventiveMaintenance() {
   };
 
   return (
-    <AppLayout>
+    <>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
           <h1 className="text-2xl font-bold">Preventive Maintenance</h1>
@@ -424,6 +423,6 @@ export default function PreventiveMaintenance() {
           onClose={() => setIsAddingTask(false)}
         />
       )}
-    </AppLayout>
+    </>
   );
 }
