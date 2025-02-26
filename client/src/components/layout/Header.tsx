@@ -20,19 +20,19 @@ export default function Header() {
   const getPageTitle = () => {
     switch (location) {
       case '/':
-        return 'Dashboard';
+        return 'Panel de Control';
       case '/corrective':
-        return 'Corrective Maintenance';
+        return 'Mantenimiento Correctivo';
       case '/preventive':
-        return 'Preventive Maintenance';
+        return 'Mantenimiento Preventivo';
       case '/purchasing':
-        return 'Purchasing';
+        return 'Compras';
       case '/cities':
-        return 'Cities';
+        return 'Ciudades';
       case '/buildings':
-        return 'Buildings';
+        return 'Edificios';
       case '/apartments':
-        return 'Apartments';
+        return 'Apartamentos';
       default:
         return 'AirMaint';
     }
@@ -68,13 +68,13 @@ export default function Header() {
                   />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="bg-white text-neutral-800">
+                <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuItem className="text-neutral-700 hover:text-neutral-900">Perfil</DropdownMenuItem>
+                <DropdownMenuItem className="text-neutral-700 hover:text-neutral-900">Configuración</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={logout} className="text-destructive hover:text-destructive hover:bg-destructive/10">Cerrar Sesión</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
