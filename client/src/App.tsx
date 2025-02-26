@@ -30,8 +30,8 @@ function Router() {
       <Route path="/purchasing" component={Purchasing} />
       <Route path="/cities" component={Cities} />
       <Route path="/buildings" component={Buildings} />
-      <Route path="/apartments" component={Apartments} />
       <Route path="/apartments/:id" component={ApartmentDetails} />
+      <Route path="/apartments" component={Apartments} />
       <Route component={NotFound} />
     </Switch>
   );

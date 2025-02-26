@@ -77,7 +77,12 @@ export default function ApartmentDetails() {
     data: tasks = [] as Task[],
     isLoading: isLoadingTasks,
   } = useQuery<Task[]>({
-    queryKey: ["/api/tasks", { apartmentId }],
+    queryKey: ["/api/tasks"],
+    queryFn: async () => {
+      const res = await fetch(`/api/tasks?apartmentId=${apartmentId}`);
+      if (!res.ok) throw new Error("Failed to fetch tasks");
+      return res.json();
+    },
     enabled: !!apartmentId,
   });
 
