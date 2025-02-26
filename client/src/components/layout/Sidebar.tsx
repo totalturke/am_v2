@@ -28,11 +28,11 @@ const NavItem = ({ href, icon, children, active }: NavItemProps) => {
     <Link href={href}>
       {/* Direct span instead of anchor to avoid a inside a issue */}
       <span className={cn(
-        "flex items-center px-4 py-3 text-white hover:bg-primary-600 font-medium cursor-pointer",
-        active && "bg-primary-600"
+        "flex items-center px-4 py-4 text-white hover:bg-primary-800 font-medium cursor-pointer rounded-md my-1 mx-2 text-base",
+        active && "bg-primary-800"
       )}>
-        <span className="h-5 w-5 mr-3 text-white">{icon}</span>
-        <span className="text-white">{children}</span>
+        <span className="h-6 w-6 mr-4 text-white">{icon}</span>
+        <span className="text-white font-medium">{children}</span>
       </span>
     </Link>
   );
@@ -74,35 +74,38 @@ export default function Sidebar() {
       {/* Mobile sidebar toggle button */}
       <button 
         onClick={toggleSidebar}
-        className="fixed top-4 left-4 p-2 rounded-md lg:hidden z-40 text-neutral-600 hover:bg-neutral-100"
+        className="fixed top-4 left-4 p-3 rounded-md lg:hidden z-40 bg-primary-600 text-white hover:bg-primary-700 shadow-lg"
+        aria-label="Toggle menu"
       >
-        {isOpen ? <X size={24} /> : <Menu size={24} />}
+        {isOpen ? <X size={28} /> : <Menu size={28} />}
       </button>
 
       {/* Sidebar */}
       <div 
         id="sidebar" 
         className={cn(
-          "fixed lg:relative inset-y-0 left-0 z-30 w-64 transform transition duration-200 ease-in-out bg-primary-500 text-white",
+          "fixed lg:relative inset-y-0 left-0 z-30 w-72 transform transition duration-200 ease-in-out bg-gray-900 text-white shadow-xl overflow-hidden",
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         <div className="flex flex-col h-full">
-          <div className="p-4 border-b border-primary-600">
-            <div className="flex items-center space-x-2">
-              <Building className="h-8 w-8" />
-              <h1 className="text-xl font-bold">AirMaint</h1>
+          {/* App logo and title */}
+          <div className="p-5 border-b border-gray-800">
+            <div className="flex items-center space-x-3">
+              <Building className="h-9 w-9 text-primary-400" />
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-300 to-primary-500 bg-clip-text text-transparent">AirMaint</h1>
             </div>
           </div>
           
-          <nav className="flex-1 overflow-y-auto pt-4">
-            <div className="px-4 mb-3 text-sm font-medium text-primary-200 uppercase">Menú Principal</div>
+          {/* Navigation menu */}
+          <nav className="flex-1 overflow-y-auto pt-5 pb-4">
+            <div className="px-5 mb-2 text-sm font-bold text-primary-300 uppercase tracking-wider">Menú Principal</div>
             
             <NavItem href="/" icon={<Home />} active={location === '/'}>
               Panel de Control
             </NavItem>
 
-            <div className="px-4 mt-6 mb-3 text-sm font-medium text-primary-200 uppercase">Mantenimiento</div>
+            <div className="px-5 mt-6 mb-2 text-sm font-bold text-primary-300 uppercase tracking-wider">Mantenimiento</div>
             
             <NavItem href="/corrective" icon={<AlertTriangle />} active={location === '/corrective'}>
               Correctivo
@@ -116,7 +119,7 @@ export default function Sidebar() {
               Compras
             </NavItem>
 
-            <div className="px-4 mt-6 mb-3 text-sm font-medium text-primary-200 uppercase">Organización</div>
+            <div className="px-5 mt-6 mb-2 text-sm font-bold text-primary-300 uppercase tracking-wider">Organización</div>
             
             <NavItem href="/cities" icon={<MapPin />} active={location === '/cities'}>
               Ciudades
@@ -131,17 +134,18 @@ export default function Sidebar() {
             </NavItem>
           </nav>
 
+          {/* User profile section */}
           {user && (
-            <div className="p-4 border-t border-primary-600">
+            <div className="p-4 border-t border-gray-800 bg-gray-800 m-2 rounded-lg">
               <div className="flex items-center">
                 <img 
                   src={user.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"} 
                   alt="User profile" 
-                  className="h-8 w-8 rounded-full mr-3"
+                  className="h-10 w-10 rounded-full mr-3 border-2 border-primary-400"
                 />
                 <div>
-                  <p className="text-sm font-medium">{user.name}</p>
-                  <p className="text-xs text-primary-200">
+                  <p className="text-base font-medium text-white">{user.name}</p>
+                  <p className="text-sm text-primary-300">
                     {user.role === 'control_center' ? 'Centro de Control' : 
                      user.role === 'maintenance_agent' ? 'Agente de Mantenimiento' : 
                      user.role === 'purchasing_agent' ? 'Agente de Compras' : user.role}
@@ -152,6 +156,14 @@ export default function Sidebar() {
           )}
         </div>
       </div>
+
+      {/* Semi-transparent overlay for mobile - closes sidebar when clicking outside */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
     </>
   );
 }

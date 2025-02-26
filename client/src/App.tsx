@@ -24,15 +24,79 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
-      <Route path="/" component={Dashboard} />
-      <Route path="/corrective" component={CorrectiveMaintenance} />
-      <Route path="/preventive" component={PreventiveMaintenance} />
-      <Route path="/purchasing" component={Purchasing} />
-      <Route path="/cities" component={Cities} />
-      <Route path="/buildings" component={Buildings} />
-      <Route path="/apartments/:id" component={ApartmentDetails} />
-      <Route path="/apartments" component={Apartments} />
-      <Route component={NotFound} />
+      
+      {/* Protected routes */}
+      <Route path="/">
+        {() => (
+          <AppLayout>
+            <Dashboard />
+          </AppLayout>
+        )}
+      </Route>
+      
+      <Route path="/corrective">
+        {() => (
+          <AppLayout>
+            <CorrectiveMaintenance />
+          </AppLayout>
+        )}
+      </Route>
+      
+      <Route path="/preventive">
+        {() => (
+          <AppLayout>
+            <PreventiveMaintenance />
+          </AppLayout>
+        )}
+      </Route>
+      
+      <Route path="/purchasing">
+        {() => (
+          <AppLayout>
+            <Purchasing />
+          </AppLayout>
+        )}
+      </Route>
+      
+      <Route path="/cities">
+        {() => (
+          <AppLayout>
+            <Cities />
+          </AppLayout>
+        )}
+      </Route>
+      
+      <Route path="/buildings">
+        {() => (
+          <AppLayout>
+            <Buildings />
+          </AppLayout>
+        )}
+      </Route>
+      
+      <Route path="/apartments/:id">
+        {(params) => (
+          <AppLayout>
+            <ApartmentDetails id={params.id} />
+          </AppLayout>
+        )}
+      </Route>
+      
+      <Route path="/apartments">
+        {() => (
+          <AppLayout>
+            <Apartments />
+          </AppLayout>
+        )}
+      </Route>
+      
+      <Route>
+        {() => (
+          <AppLayout>
+            <NotFound />
+          </AppLayout>
+        )}
+      </Route>
     </Switch>
   );
 }
