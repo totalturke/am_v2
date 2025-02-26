@@ -16,6 +16,7 @@ import {
   insertPurchaseOrderSchema, 
   insertPurchaseOrderItemSchema 
 } from "@shared/schema";
+import { setupDebugRoutes } from "./debug";
 
 // Configure multer for file uploads
 const upload = multer({
@@ -46,6 +47,9 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Set up debug routes
+  setupDebugRoutes(app);
+  
   // Auth routes
   app.post("/api/login", async (req: Request, res: Response) => {
     try {

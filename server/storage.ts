@@ -263,6 +263,36 @@ export class MemStorage implements IStorage {
     poItemsData.forEach(poItem => this.createPurchaseOrderItem(poItem as InsertPurchaseOrderItem));
   }
 
+  // Reset all data and counters
+  public async resetData() {
+    // Clear all maps
+    this.users.clear();
+    this.cities.clear();
+    this.buildings.clear();
+    this.apartments.clear();
+    this.tasks.clear();
+    this.materials.clear();
+    this.taskMaterials.clear();
+    this.purchaseOrders.clear();
+    this.purchaseOrderItems.clear();
+    
+    // Reset all counters
+    this.userIdCounter = 1;
+    this.cityIdCounter = 1;
+    this.buildingIdCounter = 1;
+    this.apartmentIdCounter = 1;
+    this.taskIdCounter = 1;
+    this.materialIdCounter = 1;
+    this.taskMaterialIdCounter = 1;
+    this.purchaseOrderIdCounter = 1;
+    this.purchaseOrderItemIdCounter = 1;
+    
+    // Re-initialize data
+    this.initializeData();
+    
+    console.log("Database has been reset and reinitialized");
+  }
+
   // User operations
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
@@ -325,7 +355,17 @@ export class MemStorage implements IStorage {
 
   // Apartment operations
   async getApartment(id: number): Promise<Apartment | undefined> {
-    return this.apartments.get(id);
+    const apartment = this.apartments.get(id);
+    
+    if (apartment) {
+      // Check if the buildingId exists
+      const building = this.buildings.get(apartment.buildingId);
+      if (!building) {
+        console.warn(`Building with ID ${apartment.buildingId} not found for apartment ${id}`);
+      }
+    }
+    
+    return apartment;
   }
 
   async getApartments(): Promise<Apartment[]> {
@@ -333,7 +373,18 @@ export class MemStorage implements IStorage {
   }
 
   async getApartmentsByBuildingId(buildingId: number): Promise<Apartment[]> {
-    return Array.from(this.apartments.values()).filter(apartment => apartment.buildingId === buildingId);
+    const apartments = Array.from(this.apartments.values()).filter(apartment => apartment.buildingId === buildingId);
+    
+    // Make sure we have valid data
+    if (apartments.length > 0) {
+      // Check if the buildingId exists
+      const building = this.buildings.get(buildingId);
+      if (!building) {
+        console.warn(`Building with ID ${buildingId} not found in storage`);
+      }
+    }
+    
+    return apartments;
   }
 
   async createApartment(apartment: InsertApartment): Promise<Apartment> {
