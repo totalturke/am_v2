@@ -77,7 +77,7 @@ function Router() {
       <Route path="/apartments/:id">
         {(params) => (
           <AppLayout>
-            <ApartmentDetails id={params.id} />
+            <ApartmentDetails id={params.id || ''} />
           </AppLayout>
         )}
       </Route>
