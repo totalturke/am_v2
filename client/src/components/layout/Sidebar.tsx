@@ -26,13 +26,14 @@ interface NavItemProps {
 const NavItem = ({ href, icon, children, active }: NavItemProps) => {
   return (
     <Link href={href}>
-      <a className={cn(
-        "flex items-center px-4 py-3 text-white hover:bg-primary-600 font-medium",
+      {/* Direct span instead of anchor to avoid a inside a issue */}
+      <span className={cn(
+        "flex items-center px-4 py-3 text-white hover:bg-primary-600 font-medium cursor-pointer",
         active && "bg-primary-600"
       )}>
         <span className="h-5 w-5 mr-3 text-white">{icon}</span>
         <span className="text-white">{children}</span>
-      </a>
+      </span>
     </Link>
   );
 };
@@ -104,11 +105,11 @@ export default function Sidebar() {
             <div className="px-4 mt-6 mb-3 text-sm font-medium text-primary-200 uppercase">Mantenimiento</div>
             
             <NavItem href="/corrective" icon={<AlertTriangle />} active={location === '/corrective'}>
-              Mantenimiento Correctivo
+              Correctivo
             </NavItem>
             
             <NavItem href="/preventive" icon={<Clipboard />} active={location === '/preventive'}>
-              Mantenimiento Preventivo
+              Preventivo
             </NavItem>
             
             <NavItem href="/purchasing" icon={<ShoppingBag />} active={location === '/purchasing'}>
@@ -141,9 +142,9 @@ export default function Sidebar() {
                 <div>
                   <p className="text-sm font-medium">{user.name}</p>
                   <p className="text-xs text-primary-200">
-                    {user.role === 'control_center' ? 'Control Center' : 
-                     user.role === 'maintenance_agent' ? 'Maintenance Agent' : 
-                     user.role === 'purchasing_agent' ? 'Purchasing Agent' : user.role}
+                    {user.role === 'control_center' ? 'Centro de Control' : 
+                     user.role === 'maintenance_agent' ? 'Agente de Mantenimiento' : 
+                     user.role === 'purchasing_agent' ? 'Agente de Compras' : user.role}
                   </p>
                 </div>
               </div>
