@@ -250,6 +250,11 @@ export default function Purchasing() {
       purchaseOrderId: selectedPO.id,
     });
   };
+  
+  // Handle create material form submission
+  const handleCreateMaterial = (data: z.infer<typeof materialSchema>) => {
+    createMaterialMutation.mutate(data);
+  };
 
   // Handle material selection to prefill price
   const handleMaterialChange = (value: string) => {
@@ -270,11 +275,11 @@ export default function Purchasing() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'draft':
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800">Draft</Badge>;
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800">Borrador</Badge>;
       case 'submitted':
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800">Submitted</Badge>;
+        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800">Enviada</Badge>;
       case 'received':
-        return <Badge variant="outline" className="bg-green-100 text-green-800">Received</Badge>;
+        return <Badge variant="outline" className="bg-green-100 text-green-800">Recibida</Badge>;
       default:
         return <Badge variant="outline" className="bg-gray-100 text-gray-800">{status}</Badge>;
     }
@@ -296,9 +301,9 @@ export default function Purchasing() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
                 <Package className="h-5 w-5 text-primary" />
-                Materials Inventory
+                Inventario de Materiales
               </CardTitle>
-              <CardDescription>Current inventory levels</CardDescription>
+              <CardDescription>Niveles actuales de inventario</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoadingMaterials ? (
@@ -598,20 +603,36 @@ export default function Purchasing() {
       <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Item to PO</DialogTitle>
+            <DialogTitle>Añadir Item a la Orden</DialogTitle>
             <DialogDescription>
-              Add materials to purchase order {selectedPO?.poNumber}
+              Agregar materiales a la orden de compra {selectedPO?.poNumber}
             </DialogDescription>
           </DialogHeader>
           
           <Form {...poItemForm}>
             <form onSubmit={poItemForm.handleSubmit(handleAddItem)} className="space-y-4">
+              <div className="flex justify-between items-center mb-2">
+                <FormLabel>Material</FormLabel>
+                <Button 
+                  type="button" 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsAddingItem(false);
+                    setIsAddingMaterial(true);
+                  }}
+                  className="flex items-center gap-1"
+                >
+                  <Plus className="h-3 w-3" />
+                  Nuevo Material
+                </Button>
+              </div>
+              
               <FormField
                 control={poItemForm.control}
                 name="materialId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Material</FormLabel>
                     <Select 
                       onValueChange={(value) => {
                         field.onChange(value);
@@ -621,13 +642,13 @@ export default function Purchasing() {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select material" />
+                          <SelectValue placeholder="Seleccionar material" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {materials.map((material: any) => (
                           <SelectItem key={material.id} value={material.id.toString()}>
-                            {material.name} ({material.quantity} in stock)
+                            {material.name} ({material.quantity} en stock)
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -704,6 +725,130 @@ export default function Purchasing() {
                     </>
                   ) : (
                     'Add Item'
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add New Material Dialog */}
+      <Dialog open={isAddingMaterial} onOpenChange={setIsAddingMaterial}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Boxes className="h-5 w-5 text-primary" />
+              Crear Nuevo Material
+            </DialogTitle>
+            <DialogDescription>
+              Agrega un nuevo material al inventario para poder incluirlo en órdenes de compra
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...materialForm}>
+            <form onSubmit={materialForm.handleSubmit(handleCreateMaterial)} className="space-y-4">
+              <FormField
+                control={materialForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre del Material</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Ej: Bombilla LED, Detergente, etc." />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={materialForm.control}
+                  name="quantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cantidad Inicial</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="0" 
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={materialForm.control}
+                  name="unit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Unidad de Medida</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar unidad" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="unit">Unidad</SelectItem>
+                          <SelectItem value="kg">Kilogramos</SelectItem>
+                          <SelectItem value="box">Caja</SelectItem>
+                          <SelectItem value="liter">Litro</SelectItem>
+                          <SelectItem value="meter">Metro</SelectItem>
+                          <SelectItem value="pair">Par</SelectItem>
+                          <SelectItem value="set">Set</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={materialForm.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notas (opcional)</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} placeholder="Información adicional sobre el material" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsAddingMaterial(false);
+                    setIsAddingItem(true);
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={createMaterialMutation.isPending}
+                >
+                  {createMaterialMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creando...
+                    </>
+                  ) : (
+                    'Crear Material'
                   )}
                 </Button>
               </DialogFooter>
