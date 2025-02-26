@@ -89,15 +89,15 @@ export default function MaintenanceTasksTable({ tasks, onAddTask }: MaintenanceT
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-100">Pending</Badge>;
+        return <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-100">Pendiente</Badge>;
       case 'in_progress':
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">In Progress</Badge>;
+        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">En Progreso</Badge>;
       case 'complete':
-        return <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">Complete</Badge>;
+        return <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">Completado</Badge>;
       case 'verified':
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">Verified</Badge>;
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">Verificado</Badge>;
       case 'scheduled':
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">Scheduled</Badge>;
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-100">Programado</Badge>;
       default:
         return <Badge variant="outline" className="bg-gray-100 text-gray-800 hover:bg-gray-100">{status}</Badge>;
     }
@@ -106,22 +106,22 @@ export default function MaintenanceTasksTable({ tasks, onAddTask }: MaintenanceT
   // Type badge styling
   const getTypeBadge = (type: string) => {
     return type === 'corrective' 
-      ? <Badge variant="outline" className="bg-destructive/10 text-destructive hover:bg-destructive/10">Corrective</Badge>
-      : <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">Preventive</Badge>;
+      ? <Badge variant="outline" className="bg-destructive/10 text-destructive hover:bg-destructive/10">Correctivo</Badge>
+      : <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">Preventivo</Badge>;
   };
   
   return (
     <div className="mb-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-        <h2 className="text-lg font-semibold text-neutral-800">Recent Maintenance Tasks</h2>
+        <h2 className="text-lg font-semibold text-neutral-800">Tareas de Mantenimiento Recientes</h2>
         <div className="mt-2 md:mt-0 flex space-x-2">
           <Select value={cityFilter} onValueChange={setCityFilter}>
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="All Cities" />
+              <SelectValue placeholder="Todas las Ciudades" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all_cities">All Cities</SelectItem>
-              <SelectItem value="1">Mexico City</SelectItem>
+              <SelectItem value="all_cities">Todas las Ciudades</SelectItem>
+              <SelectItem value="1">Ciudad de México</SelectItem>
               <SelectItem value="2">Cancún</SelectItem>
               <SelectItem value="3">Guadalajara</SelectItem>
               <SelectItem value="4">Monterrey</SelectItem>
@@ -130,18 +130,18 @@ export default function MaintenanceTasksTable({ tasks, onAddTask }: MaintenanceT
           
           <Select value={typeFilter} onValueChange={setTypeFilter}>
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="All Types" />
+              <SelectValue placeholder="Todos los Tipos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all_types">All Types</SelectItem>
-              <SelectItem value="corrective">Corrective</SelectItem>
-              <SelectItem value="preventive">Preventive</SelectItem>
+              <SelectItem value="all_types">Todos los Tipos</SelectItem>
+              <SelectItem value="corrective">Correctivo</SelectItem>
+              <SelectItem value="preventive">Preventivo</SelectItem>
             </SelectContent>
           </Select>
           
           <Button onClick={onAddTask} size="sm" className="flex items-center">
             <Plus className="h-4 w-4 mr-1" />
-            Add Task
+            Añadir Tarea
           </Button>
         </div>
       </div>
@@ -151,14 +151,14 @@ export default function MaintenanceTasksTable({ tasks, onAddTask }: MaintenanceT
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Task ID</TableHead>
-                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Type</TableHead>
-                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Apartment</TableHead>
-                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Issue</TableHead>
-                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Assigned To</TableHead>
-                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Status</TableHead>
-                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Date</TableHead>
-                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider text-right">Actions</TableHead>
+                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">ID de Tarea</TableHead>
+                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Tipo</TableHead>
+                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Apartamento</TableHead>
+                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Problema</TableHead>
+                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Asignado a</TableHead>
+                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Estado</TableHead>
+                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Fecha</TableHead>
+                <TableHead className="text-xs font-medium text-neutral-500 uppercase tracking-wider text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
