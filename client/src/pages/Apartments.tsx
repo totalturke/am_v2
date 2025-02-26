@@ -160,8 +160,7 @@ export default function Apartments() {
   };
 
   return (
-    <>
-      <div className="space-y-6">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
         <h1 className="text-2xl font-bold">{t("apartments.title")}</h1>
         <Button onClick={() => setIsCreating(true)} className="flex items-center gap-1">
@@ -634,7 +633,5 @@ export default function Apartments() {
       </Dialog>
     )}
   </div>
-    </>
   );
-
 }
