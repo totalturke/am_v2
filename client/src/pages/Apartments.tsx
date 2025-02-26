@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AppLayout } from "../App";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/contexts/TranslationContext";
 import { apiRequest } from "@/lib/queryClient";
 import {
   Card,
@@ -63,50 +64,27 @@ export default function Apartments() {
   const [statusFilter, setStatusFilter] = useState("all_status");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   // Fetch apartments data
   const { data: apartments = [], isLoading } = useQuery({
-    queryKey: ["/api/apartments", buildingFilter, cityFilter, statusFilter],
-    queryFn: async ({ queryKey }) => {
-      const [_, buildingId, cityId, status] = queryKey;
-      let url = "/api/apartments";
-      
-      if (buildingId && buildingId !== "all_buildings") {
-        url += `?buildingId=${buildingId}`;
-      }
-      
-      // Server doesn't support these filters directly, so we'll filter client-side
-      return fetch(url).then(res => {
-        if (!res.ok) throw new Error("Failed to fetch apartments");
-        return res.json();
-      }).then(data => {
-        // Client-side filtering for city and status
-        let filtered = data;
-        
-        if (cityId && cityId !== "all_cities") {
-          filtered = filtered.filter((apt: any) => apt.city?.id.toString() === cityId);
-        }
-        
-        if (status && status !== "all_status") {
-          filtered = filtered.filter((apt: any) => apt.status === status);
-        }
-        
-        return filtered;
-      });
-    }
+    queryKey: ["/api/apartments"],
+    queryFn: () => apiRequest("/api/apartments"),
   });
 
-  // Fetch buildings data for filter and form
+  // Fetch buildings for the dropdown
   const { data: buildings = [] } = useQuery({
     queryKey: ["/api/buildings"],
+    queryFn: () => apiRequest("/api/buildings"),
   });
 
-  // Fetch cities data for filter
+  // Fetch cities for the dropdown
   const { data: cities = [] } = useQuery({
     queryKey: ["/api/cities"],
+    queryFn: () => apiRequest("/api/cities"),
   });
 
-  // Apartment form
+  // Form for creating new apartment
   const form = useForm<z.infer<typeof apartmentSchema>>({
     resolver: zodResolver(apartmentSchema),
     defaultValues: {
@@ -116,64 +94,65 @@ export default function Apartments() {
       bedroomCount: 1,
       bathroomCount: 1,
       squareMeters: 50,
-      notes: "",
       imageUrl: "",
+      notes: "",
     },
   });
 
   // Create apartment mutation
   const createApartmentMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof apartmentSchema>) => {
-      return apiRequest("POST", "/api/apartments", {
-        ...data,
-        buildingId: parseInt(data.buildingId),
-        bedroomCount: Number(data.bedroomCount),
-        bathroomCount: Number(data.bathroomCount),
-        squareMeters: Number(data.squareMeters),
+    mutationFn: (values: z.infer<typeof apartmentSchema>) => {
+      return apiRequest("/api/apartments", {
+        method: "POST",
+        data: values,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/apartments"] });
       toast({
-        title: "Apartment Created",
-        description: "The apartment has been added successfully.",
+        title: t("apartments.apartmentCreated"),
+        description: t("apartments.apartmentCreatedSuccess"),
       });
       setIsCreating(false);
       form.reset();
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create apartment. Please try again.",
+        title: t("common.error"),
+        description: t("apartments.errorCreatingApartment"),
         variant: "destructive",
       });
     },
   });
 
-  // Filter apartments based on search query
-  const filteredApartments = apartments.filter((apartment: any) => 
-    apartment.apartmentNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    apartment.building?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    apartment.city?.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter apartments based on search and filters
+  const filteredApartments = apartments.filter((apartment: any) => {
+    const matchesSearch = searchQuery === "" || 
+      apartment.apartmentNumber.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCity = cityFilter === "all_cities" || apartment.building?.cityId.toString() === cityFilter;
+    const matchesBuilding = buildingFilter === "all_buildings" || apartment.buildingId.toString() === buildingFilter;
+    const matchesStatus = statusFilter === "all_status" || apartment.status === statusFilter;
+    
+    return matchesSearch && matchesCity && matchesBuilding && matchesStatus;
+  });
+
+  // Get status badge component based on status string
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge className="bg-green-500 text-white">{t("apartments.active")}</Badge>;
+      case 'maintenance':
+        return <Badge className="bg-yellow-500 text-white">{t("apartments.maintenance")}</Badge>;
+      case 'inactive':
+        return <Badge className="bg-neutral-500 text-white">{t("apartments.inactive")}</Badge>;
+      default:
+        return <Badge className="bg-neutral-500 text-white">{status}</Badge>;
+    }
+  };
 
   // Handle form submission
   const handleCreateApartment = (data: z.infer<typeof apartmentSchema>) => {
     createApartmentMutation.mutate(data);
-  };
-
-  // Get status badge for apartment
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-500 text-white">Active</Badge>;
-      case 'maintenance':
-        return <Badge className="bg-yellow-500 text-white">Maintenance</Badge>;
-      case 'inactive':
-        return <Badge className="bg-neutral-500 text-white">Inactive</Badge>;
-      default:
-        return <Badge className="bg-neutral-500 text-white">{status}</Badge>;
-    }
   };
 
   // View apartment details
@@ -185,26 +164,26 @@ export default function Apartments() {
     <AppLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
-          <h1 className="text-2xl font-bold">Apartments</h1>
+          <h1 className="text-2xl font-bold">{t("apartments.title")}</h1>
           <Button onClick={() => setIsCreating(true)} className="flex items-center gap-1">
             <Plus className="h-4 w-4" />
-            Add Apartment
+            {t("apartments.add")}
           </Button>
         </div>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle>Apartments</CardTitle>
+            <CardTitle>{t("apartments.title")}</CardTitle>
             <CardDescription>
-              Manage apartments across all buildings and cities
+              {t("apartments.manage")}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
               <div className="relative flex-1">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-500" />
                 <Input
-                  placeholder="Search apartments..."
+                  placeholder={t("apartments.search")}
                   className="pl-8"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -214,10 +193,10 @@ export default function Apartments() {
                 <Select value={cityFilter} onValueChange={setCityFilter}>
                   <SelectTrigger className="w-[140px]">
                     <MapPin className="h-4 w-4 mr-2 text-neutral-500" />
-                    <SelectValue placeholder="All Cities" />
+                    <SelectValue placeholder={t("apartments.allCities")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all_cities">All Cities</SelectItem>
+                    <SelectItem value="all_cities">{t("apartments.allCities")}</SelectItem>
                     {cities.map((city: any) => (
                       <SelectItem key={city.id} value={city.id.toString()}>
                         {city.name}
@@ -225,14 +204,13 @@ export default function Apartments() {
                     ))}
                   </SelectContent>
                 </Select>
-                
                 <Select value={buildingFilter} onValueChange={setBuildingFilter}>
                   <SelectTrigger className="w-[160px]">
                     <Building className="h-4 w-4 mr-2 text-neutral-500" />
-                    <SelectValue placeholder="All Buildings" />
+                    <SelectValue placeholder={t("apartments.allBuildings")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all_buildings">All Buildings</SelectItem>
+                    <SelectItem value="all_buildings">{t("apartments.allBuildings")}</SelectItem>
                     {buildings.map((building: any) => (
                       <SelectItem key={building.id} value={building.id.toString()}>
                         {building.name}
@@ -243,29 +221,27 @@ export default function Apartments() {
                 
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="All Status" />
+                    <SelectValue placeholder={t("apartments.allStatus")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all_status">All Status</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="maintenance">Maintenance</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="all_status">{t("apartments.allStatus")}</SelectItem>
+                    <SelectItem value="active">{t("apartments.active")}</SelectItem>
+                    <SelectItem value="maintenance">{t("apartments.maintenance")}</SelectItem>
+                    <SelectItem value="inactive">{t("apartments.inactive")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             {isLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
+              <div className="flex justify-center py-8"><Loader2 className="h-8 w-8 animate-spin text-neutral-500" /></div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredApartments.length === 0 ? (
                   <div className="col-span-3 text-center py-8 text-neutral-500">
                     {searchQuery || cityFilter || buildingFilter || statusFilter
-                      ? "No apartments found matching your search"
-                      : "No apartments found"}
+                      ? t("apartments.noFoundMatching")
+                      : t("apartments.noFound")}
                   </div>
                 ) : (
                   filteredApartments.map((apartment: any) => (
@@ -299,30 +275,30 @@ export default function Apartments() {
                         <div className="mt-3 flex items-center text-sm">
                           <Calendar className="h-4 w-4 text-neutral-500 mr-1" />
                           <span className="text-neutral-600">
-                            Last maintenance: {apartment.lastMaintenance 
+                            {t("apartments.lastMaintenance:")} {apartment.lastMaintenance 
                               ? format(new Date(apartment.lastMaintenance), "d MMM yyyy")
-                              : "Not yet maintained"}
+                              : t("apartments.notYetMaintained")}
                           </span>
                         </div>
                         <div className="mt-1 flex items-center gap-2 text-sm">
                           <div className="flex items-center">
                             <HomeIcon className="h-4 w-4 text-neutral-500 mr-1" />
-                            <span>{apartment.bedroomCount} bd</span>
+                            <span>{apartment.bedroomCount} {t("apartments.bd")}</span>
                           </div>
                           <div className="flex items-center">
-                            <span>{apartment.bathroomCount} ba</span>
+                            <span>{apartment.bathroomCount} {t("apartments.ba")}</span>
                           </div>
                           <div className="flex items-center">
-                            <span>{apartment.squareMeters} m²</span>
+                            <span>{apartment.squareMeters} {t("apartments.m²")}</span>
                           </div>
                         </div>
                         <div className="mt-4 flex justify-between">
                           <div>
-                            <div className="text-xs text-neutral-500 mb-1">Next scheduled maintenance</div>
+                            <div className="text-xs text-neutral-500 mb-1">{t("apartments.nextScheduledMaintenance")}</div>
                             <div className="text-sm font-medium">
                               {apartment.nextMaintenance 
                                 ? format(new Date(apartment.nextMaintenance), "MMM d, yyyy")
-                                : "Not scheduled"}
+                                : t("apartments.notScheduled")}
                             </div>
                           </div>
                           <Button 
@@ -334,7 +310,7 @@ export default function Apartments() {
                               handleViewApartment(apartment);
                             }}
                           >
-                            Details
+                            {t("apartments.details")}
                           </Button>
                         </div>
                       </CardContent>
@@ -351,9 +327,9 @@ export default function Apartments() {
       <Dialog open={isCreating} onOpenChange={setIsCreating}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Apartment</DialogTitle>
+            <DialogTitle>{t("apartments.add")}</DialogTitle>
             <DialogDescription>
-              Add a new apartment to the system
+              {t("apartments.addDescription")}
             </DialogDescription>
           </DialogHeader>
           
@@ -364,9 +340,9 @@ export default function Apartments() {
                 name="apartmentNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Apartment Number</FormLabel>
+                    <FormLabel>{t("apartments.apartmentNumber")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g. 101" />
+                      <Input {...field} placeholder={t("apartments.example")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -378,14 +354,14 @@ export default function Apartments() {
                 name="buildingId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Building</FormLabel>
+                    <FormLabel>{t("apartments.building")}</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a building" />
+                          <SelectValue placeholder={t("apartments.selectBuilding")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -407,7 +383,7 @@ export default function Apartments() {
                   name="bedroomCount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Bedrooms</FormLabel>
+                      <FormLabel>{t("apartments.bedrooms")}</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
@@ -426,7 +402,7 @@ export default function Apartments() {
                   name="bathroomCount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Bathrooms</FormLabel>
+                      <FormLabel>{t("apartments.bathrooms")}</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
@@ -445,7 +421,7 @@ export default function Apartments() {
                   name="squareMeters"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Square Meters</FormLabel>
+                      <FormLabel>{t("apartments.squareMeters")}</FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
@@ -465,7 +441,7 @@ export default function Apartments() {
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel>{t("apartments.status")}</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value}
@@ -476,9 +452,9 @@ export default function Apartments() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="maintenance">Maintenance</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="active">{t("apartments.active")}</SelectItem>
+                        <SelectItem value="maintenance">{t("apartments.maintenance")}</SelectItem>
+                        <SelectItem value="inactive">{t("apartments.inactive")}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -491,9 +467,9 @@ export default function Apartments() {
                 name="imageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image URL (optional)</FormLabel>
+                    <FormLabel>{t("apartments.imageUrl")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="https://..." />
+                      <Input {...field} placeholder={t("apartments.imageUrlPlaceholder")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -505,9 +481,9 @@ export default function Apartments() {
                 name="notes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Notes (optional)</FormLabel>
+                    <FormLabel>{t("apartments.notes")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Any additional notes" />
+                      <Input {...field} placeholder={t("apartments.notesPlaceholder")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -520,7 +496,7 @@ export default function Apartments() {
                   variant="outline" 
                   onClick={() => setIsCreating(false)}
                 >
-                  Cancel
+                  {t("apartments.cancel")}
                 </Button>
                 <Button 
                   type="submit" 
@@ -529,10 +505,10 @@ export default function Apartments() {
                   {createApartmentMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
+                      {t("apartments.creating")}
                     </>
                   ) : (
-                    'Create Apartment'
+                    t("apartments.createApartment")
                   )}
                 </Button>
               </DialogFooter>
@@ -566,52 +542,52 @@ export default function Apartments() {
                 
                 <div className="mt-4 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium text-neutral-500">Status:</span>
+                    <span className="text-sm font-medium text-neutral-500">{t("apartments.status:")}:</span>
                     <span>{getStatusBadge(selectedApartment.status)}</span>
                   </div>
                   
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium text-neutral-500">Bedrooms:</span>
+                    <span className="text-sm font-medium text-neutral-500">{t("apartments.bedrooms:")}:</span>
                     <span>{selectedApartment.bedroomCount}</span>
                   </div>
                   
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium text-neutral-500">Bathrooms:</span>
+                    <span className="text-sm font-medium text-neutral-500">{t("apartments.bathrooms:")}:</span>
                     <span>{selectedApartment.bathroomCount}</span>
                   </div>
                   
                   <div className="flex justify-between">
-                    <span className="text-sm font-medium text-neutral-500">Size:</span>
-                    <span>{selectedApartment.squareMeters} m²</span>
+                    <span className="text-sm font-medium text-neutral-500">{t("apartments.size:")}:</span>
+                    <span>{selectedApartment.squareMeters} {t("apartments.m²")}</span>
                   </div>
                 </div>
               </div>
               
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-sm font-medium text-neutral-500 mb-2">Maintenance History</h3>
+                  <h3 className="text-sm font-medium text-neutral-500 mb-2">{t("apartments.maintenanceHistory")}</h3>
                   <div className="bg-neutral-50 rounded-md p-3">
                     <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium">Last Maintenance:</span>
+                      <span className="text-sm font-medium">{t("apartments.lastMaintenance:")}:</span>
                       <span className="text-sm">
                         {selectedApartment.lastMaintenance
-                          ? format(new Date(selectedApartment.lastMaintenance), "MMM d, yyyy")
-                          : "No record"}
+                          ? format(new Date(selectedApartment.lastMaintenance), "d MMM yyyy")
+                          : t("apartments.noRecord")}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm font-medium">Next Scheduled:</span>
+                      <span className="text-sm font-medium">{t("apartments.nextScheduled:")}:</span>
                       <span className="text-sm">
                         {selectedApartment.nextMaintenance
                           ? format(new Date(selectedApartment.nextMaintenance), "MMM d, yyyy")
-                          : "Not scheduled"}
+                          : t("apartments.notScheduled")}
                       </span>
                     </div>
                   </div>
                 </div>
                 
                 <div>
-                  <h3 className="text-sm font-medium text-neutral-500 mb-2">Recent Tasks</h3>
+                  <h3 className="text-sm font-medium text-neutral-500 mb-2">{t("apartments.recentTasks")}</h3>
                   {selectedApartment.tasks && selectedApartment.tasks.length > 0 ? (
                     <div className="space-y-2">
                       {selectedApartment.tasks.slice(0, 3).map((task: any) => (
@@ -635,14 +611,14 @@ export default function Apartments() {
                     </div>
                   ) : (
                     <div className="bg-neutral-50 rounded-md p-3 text-center text-sm text-neutral-500">
-                      No maintenance tasks recorded
+                      {t("apartments.noMaintenanceTasksRecorded")}
                     </div>
                   )}
                 </div>
                 
                 {selectedApartment.notes && (
                   <div>
-                    <h3 className="text-sm font-medium text-neutral-500 mb-2">Notes</h3>
+                    <h3 className="text-sm font-medium text-neutral-500 mb-2">{t("apartments.notes")}</h3>
                     <div className="bg-neutral-50 rounded-md p-3">
                       <p className="text-sm">{selectedApartment.notes}</p>
                     </div>
@@ -652,8 +628,8 @@ export default function Apartments() {
             </div>
             
             <DialogFooter>
-              <Button variant="outline" onClick={() => setSelectedApartment(null)}>Close</Button>
-              <Button>Schedule Maintenance</Button>
+              <Button variant="outline" onClick={() => setSelectedApartment(null)}>{t("apartments.close")}</Button>
+              <Button>{t("apartments.scheduleMaintenance")}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

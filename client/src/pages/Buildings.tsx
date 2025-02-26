@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AppLayout } from "../App";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/contexts/TranslationContext";
 import { apiRequest } from "@/lib/queryClient";
 import {
   Table,
@@ -62,6 +63,7 @@ export default function Buildings() {
   const [cityFilter, setCityFilter] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   // Fetch buildings data
   const { data: buildings = [], isLoading } = useQuery({
@@ -103,26 +105,30 @@ export default function Buildings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/buildings"] });
       toast({
-        title: "Building Created",
-        description: "The building has been added successfully.",
+        title: t("buildings.buildingCreated"),
+        description: t("buildings.buildingCreatedSuccess"),
       });
       setIsCreating(false);
       form.reset();
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to create building. Please try again.",
+        title: t("common.error"),
+        description: t("buildings.errorCreatingBuilding"),
         variant: "destructive",
       });
     },
   });
 
-  // Filter buildings based on search query
-  const filteredBuildings = buildings.filter((building: any) => 
-    building.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    building.address.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter buildings based on search and city filter
+  const filteredBuildings = buildings.filter((building: any) => {
+    const matchesSearch = searchQuery === "" || 
+      building.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      building.address.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCity = cityFilter === "" || cityFilter === "all_cities" || building.cityId.toString() === cityFilter;
+    
+    return matchesSearch && matchesCity;
+  });
 
   // Handle form submission
   const handleCreateBuilding = (data: z.infer<typeof buildingSchema>) => {
@@ -133,26 +139,26 @@ export default function Buildings() {
     <AppLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
-          <h1 className="text-2xl font-bold">Buildings</h1>
+          <h1 className="text-2xl font-bold">{t("buildings.title")}</h1>
           <Button onClick={() => setIsCreating(true)} className="flex items-center gap-1">
             <Plus className="h-4 w-4" />
-            Add Building
+            {t("buildings.add")}
           </Button>
         </div>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle>Buildings</CardTitle>
+            <CardTitle>{t("buildings.title")}</CardTitle>
             <CardDescription>
-              Manage buildings where apartments are located
+              {t("buildings.manage")}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
               <div className="relative flex-1">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-neutral-500" />
                 <Input
-                  placeholder="Search buildings..."
+                  placeholder={t("buildings.search")}
                   className="pl-8"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -161,10 +167,10 @@ export default function Buildings() {
               <Select value={cityFilter} onValueChange={setCityFilter}>
                 <SelectTrigger className="w-[180px]">
                   <MapPin className="h-4 w-4 mr-2 text-neutral-500" />
-                  <SelectValue placeholder="All Cities" />
+                  <SelectValue placeholder={t("buildings.allCities")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all_cities">All Cities</SelectItem>
+                  <SelectItem value="all_cities">{t("buildings.allCities")}</SelectItem>
                   {cities.map((city: any) => (
                     <SelectItem key={city.id} value={city.id.toString()}>
                       {city.name}
@@ -175,19 +181,17 @@ export default function Buildings() {
             </div>
 
             {isLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
+              <div className="flex justify-center py-8"><Loader2 className="h-8 w-8 animate-spin text-neutral-500" /></div>
             ) : (
-              <div className="rounded-md border overflow-hidden">
+              <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Building</TableHead>
-                      <TableHead>Address</TableHead>
-                      <TableHead>City</TableHead>
-                      <TableHead>Total Units</TableHead>
-                      <TableHead>Active Units</TableHead>
+                      <TableHead>{t("buildings.name")}</TableHead>
+                      <TableHead>{t("buildings.address")}</TableHead>
+                      <TableHead>{t("buildings.city")}</TableHead>
+                      <TableHead>{t("buildings.totalUnits")}</TableHead>
+                      <TableHead>{t("buildings.activeUnits")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -195,8 +199,8 @@ export default function Buildings() {
                       <TableRow>
                         <TableCell colSpan={5} className="text-center py-8 text-neutral-500">
                           {searchQuery || cityFilter 
-                            ? "No buildings found matching your search" 
-                            : "No buildings found"}
+                            ? t("buildings.noFoundMatching") 
+                            : t("buildings.noFound")}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -212,7 +216,7 @@ export default function Buildings() {
                           <TableCell>
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 mr-1 text-neutral-500" />
-                              {building.city?.name || "Unknown"}
+                              {building.city?.name || t("Unknown")}
                             </div>
                           </TableCell>
                           <TableCell>{building.totalUnits}</TableCell>
@@ -235,9 +239,9 @@ export default function Buildings() {
       <Dialog open={isCreating} onOpenChange={setIsCreating}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Building</DialogTitle>
+            <DialogTitle>{t("buildings.add")}</DialogTitle>
             <DialogDescription>
-              Add a new building to manage apartments
+              {t("buildings.addDescription")}
             </DialogDescription>
           </DialogHeader>
           
@@ -248,9 +252,9 @@ export default function Buildings() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Building Name</FormLabel>
+                    <FormLabel>{t("buildings.name")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g. Torre Blanca" />
+                      <Input {...field} placeholder={t("buildings.namePlaceholder")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -262,9 +266,9 @@ export default function Buildings() {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address</FormLabel>
+                    <FormLabel>{t("buildings.address")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g. Av. Reforma 123" />
+                      <Input {...field} placeholder={t("buildings.addressPlaceholder")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -276,14 +280,14 @@ export default function Buildings() {
                 name="cityId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>City</FormLabel>
+                    <FormLabel>{t("buildings.city")}</FormLabel>
                     <Select 
                       onValueChange={field.onChange} 
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a city" />
+                          <SelectValue placeholder={t("buildings.selectCity")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -304,7 +308,7 @@ export default function Buildings() {
                 name="totalUnits"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Total Units</FormLabel>
+                    <FormLabel>{t("buildings.totalUnits")}</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -324,7 +328,7 @@ export default function Buildings() {
                   variant="outline" 
                   onClick={() => setIsCreating(false)}
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
                 <Button 
                   type="submit" 
@@ -333,10 +337,10 @@ export default function Buildings() {
                   {createBuildingMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
+                      {t("buildings.creating")}
                     </>
                   ) : (
-                    'Create Building'
+                    t("buildings.create")
                   )}
                 </Button>
               </DialogFooter>

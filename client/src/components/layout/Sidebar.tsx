@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useTranslation } from "../../contexts/TranslationContext";
 import { cn } from "@/lib/utils";
 
 // Icons
@@ -41,6 +42,7 @@ const NavItem = ({ href, icon, children, active }: NavItemProps) => {
 export default function Sidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   // Close sidebar when navigating on mobile
@@ -99,38 +101,38 @@ export default function Sidebar() {
           
           {/* Navigation menu */}
           <nav className="flex-1 overflow-y-auto pt-5 pb-4">
-            <div className="px-5 mb-2 text-sm font-bold text-primary-300 uppercase tracking-wider">Menú Principal</div>
+            <div className="px-5 mb-2 text-sm font-bold text-primary-300 uppercase tracking-wider">{t('sidebar.mainMenu')}</div>
             
             <NavItem href="/" icon={<Home />} active={location === '/'}>
-              Panel de Control
+              {t('dashboard.title')}
             </NavItem>
 
-            <div className="px-5 mt-6 mb-2 text-sm font-bold text-primary-300 uppercase tracking-wider">Mantenimiento</div>
+            <div className="px-5 mt-6 mb-2 text-sm font-bold text-primary-300 uppercase tracking-wider">{t('sidebar.maintenanceMenu')}</div>
             
             <NavItem href="/corrective" icon={<AlertTriangle />} active={location === '/corrective'}>
-              Correctivo
+              {t('common.corrective')}
             </NavItem>
             
             <NavItem href="/preventive" icon={<Clipboard />} active={location === '/preventive'}>
-              Preventivo
+              {t('common.preventive')}
             </NavItem>
             
             <NavItem href="/purchasing" icon={<ShoppingBag />} active={location === '/purchasing'}>
-              Compras
+              {t('common.purchasing')}
             </NavItem>
 
-            <div className="px-5 mt-6 mb-2 text-sm font-bold text-primary-300 uppercase tracking-wider">Organización</div>
+            <div className="px-5 mt-6 mb-2 text-sm font-bold text-primary-300 uppercase tracking-wider">{t('sidebar.organizationMenu')}</div>
             
             <NavItem href="/cities" icon={<MapPin />} active={location === '/cities'}>
-              Ciudades
+              {t('common.cities')}
             </NavItem>
             
             <NavItem href="/buildings" icon={<Building />} active={location === '/buildings'}>
-              Edificios
+              {t('common.buildings')}
             </NavItem>
             
             <NavItem href="/apartments" icon={<HomeIcon />} active={location === '/apartments'}>
-              Apartamentos
+              {t('common.apartments')}
             </NavItem>
           </nav>
 
@@ -146,9 +148,9 @@ export default function Sidebar() {
                 <div>
                   <p className="text-base font-medium text-white">{user.name}</p>
                   <p className="text-sm text-primary-300">
-                    {user.role === 'control_center' ? 'Centro de Control' : 
-                     user.role === 'maintenance_agent' ? 'Agente de Mantenimiento' : 
-                     user.role === 'purchasing_agent' ? 'Agente de Compras' : user.role}
+                    {user.role === 'control_center' ? t('common.controlCenter') : 
+                     user.role === 'maintenance_agent' ? t('common.maintenanceAgent') : 
+                     user.role === 'purchasing_agent' ? t('common.purchasingAgent') : user.role}
                   </p>
                 </div>
               </div>

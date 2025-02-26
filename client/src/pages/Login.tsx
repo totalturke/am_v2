@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { useTranslation } from "../contexts/TranslationContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -31,6 +32,7 @@ const loginSchema = z.object({
 
 export default function Login() {
   const { login, isLoading } = useAuth();
+  const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
 
   // Login form
@@ -54,9 +56,9 @@ export default function Login() {
 
   // Demo login credentials
   const demoCredentials = [
-    { role: "Control Center", username: "miguel", password: "password" },
-    { role: "Maintenance Agent", username: "carlos", password: "password" },
-    { role: "Purchasing Agent", username: "pedro", password: "password" },
+    { role: t('common.controlCenter'), username: "miguel", password: "password" },
+    { role: t('common.maintenanceAgent'), username: "carlos", password: "password" },
+    { role: t('common.purchasingAgent'), username: "pedro", password: "password" },
   ];
 
   // Handle demo login
@@ -77,9 +79,9 @@ export default function Login() {
         
         <Card>
           <CardHeader>
-            <CardTitle>Login to AirMaint</CardTitle>
+            <CardTitle>{t('auth.loginTitle')}</CardTitle>
             <CardDescription>
-              Maintenance management system for Airbnb apartments
+              {t('auth.loginDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -90,9 +92,9 @@ export default function Login() {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Username</FormLabel>
+                      <FormLabel>{t('auth.username')}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter your username" autoComplete="username" />
+                        <Input {...field} placeholder={t('auth.enterUsername')} autoComplete="username" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -104,12 +106,12 @@ export default function Login() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>{t('auth.password')}</FormLabel>
                       <FormControl>
                         <Input 
                           {...field} 
                           type="password" 
-                          placeholder="Enter your password" 
+                          placeholder={t('auth.enterPassword')} 
                           autoComplete="current-password" 
                         />
                       </FormControl>
@@ -130,10 +132,10 @@ export default function Login() {
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Logging in...
+                      {t('auth.loggingIn')}
                     </>
                   ) : (
-                    'Log in'
+                    t('auth.login')
                   )}
                 </Button>
               </form>
@@ -141,7 +143,7 @@ export default function Login() {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <div className="text-sm text-neutral-500 text-center w-full">
-              Demo accounts for testing:
+              {t('auth.demoAccounts')}
             </div>
             <div className="grid grid-cols-1 gap-2 w-full">
               {demoCredentials.map((cred, index) => (
@@ -152,7 +154,7 @@ export default function Login() {
                   onClick={() => handleDemoLogin(cred.username, cred.password)}
                   className="text-xs"
                 >
-                  Login as {cred.role} ({cred.username})
+                  {t('auth.loginAs', { role: cred.role, username: cred.username })}
                 </Button>
               ))}
             </div>

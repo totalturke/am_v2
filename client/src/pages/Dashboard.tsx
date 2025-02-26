@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "../App";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/contexts/TranslationContext";
 import DashboardStats from "../components/dashboard/DashboardStats";
 import MaintenanceTasksTable from "../components/dashboard/MaintenanceTasksTable";
 import ApartmentsGrid from "../components/dashboard/ApartmentsGrid";
@@ -12,6 +13,7 @@ import { Loader2 } from "lucide-react";
 export default function Dashboard() {
   const [isAddingTask, setIsAddingTask] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Fetch dashboard stats and data
   const { data: dashboardData, isLoading, error } = useQuery({
@@ -21,12 +23,12 @@ export default function Dashboard() {
   useEffect(() => {
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to load dashboard data. Please try again.",
+        title: t('common.error'),
+        description: t('dashboard.errorLoadingData'),
         variant: "destructive",
       });
     }
-  }, [error, toast]);
+  }, [error, toast, t]);
 
   const handleAddTask = () => {
     setIsAddingTask(true);

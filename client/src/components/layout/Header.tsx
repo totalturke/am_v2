@@ -1,6 +1,7 @@
 import { useLocation, Link } from "wouter";
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useTranslation } from "../../contexts/TranslationContext";
 import { 
   Bell, 
   Home, 
@@ -24,6 +25,7 @@ import {
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const [location] = useLocation();
   const [notifications] = useState(5); // Demo notification count
   const [navOpen, setNavOpen] = useState(false);
@@ -31,22 +33,22 @@ export default function Header() {
   const getPageTitle = () => {
     switch (location) {
       case '/':
-        return 'Panel de Control';
+        return t('dashboard.title');
       case '/corrective':
-        return 'Mantenimiento Correctivo';
+        return t('common.corrective');
       case '/preventive':
-        return 'Mantenimiento Preventivo';
+        return t('common.preventive');
       case '/purchasing':
-        return 'Compras';
+        return t('common.purchasing');
       case '/cities':
-        return 'Ciudades';
+        return t('common.cities');
       case '/buildings':
-        return 'Edificios';
+        return t('common.buildings');
       case '/apartments':
-        return 'Apartamentos';
+        return t('common.apartments');
       default:
         if (location.startsWith('/apartments/')) {
-          return 'Detalles del Apartamento';
+          return t('apartments.apartmentDetails');
         }
         return 'AirMaint';
     }
@@ -54,10 +56,10 @@ export default function Header() {
 
   // Navigation links for the top bar
   const navLinks = [
-    { href: '/', icon: <Home size={20} />, text: 'Panel' },
-    { href: '/corrective', icon: <AlertTriangle size={20} />, text: 'Correctivo' },
-    { href: '/preventive', icon: <Clipboard size={20} />, text: 'Preventivo' },
-    { href: '/purchasing', icon: <ShoppingBag size={20} />, text: 'Compras' },
+    { href: '/', icon: <Home size={20} />, text: t('dashboard.title') },
+    { href: '/corrective', icon: <AlertTriangle size={20} />, text: t('common.corrective') },
+    { href: '/preventive', icon: <Clipboard size={20} />, text: t('common.preventive') },
+    { href: '/purchasing', icon: <ShoppingBag size={20} />, text: t('common.purchasing') },
   ];
 
   return (
@@ -87,7 +89,7 @@ export default function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="flex items-center text-neutral-700 hover:text-primary-600 hover:bg-primary-50/50">
-                <span className="mr-1">Más</span>
+                <span className="mr-1">{t('common.more')}</span>
                 <ChevronDown size={16} />
               </Button>
             </DropdownMenuTrigger>
@@ -95,19 +97,19 @@ export default function Header() {
               <Link href="/cities">
                 <DropdownMenuItem className="cursor-pointer">
                   <MapPin size={18} className="mr-2" />
-                  <span>Ciudades</span>
+                  <span>{t('common.cities')}</span>
                 </DropdownMenuItem>
               </Link>
               <Link href="/buildings">
                 <DropdownMenuItem className="cursor-pointer">
                   <Building size={18} className="mr-2" />
-                  <span>Edificios</span>
+                  <span>{t('common.buildings')}</span>
                 </DropdownMenuItem>
               </Link>
               <Link href="/apartments">
                 <DropdownMenuItem className="cursor-pointer">
                   <HomeIcon size={18} className="mr-2" />
-                  <span>Apartamentos</span>
+                  <span>{t('common.apartments')}</span>
                 </DropdownMenuItem>
               </Link>
             </DropdownMenuContent>
@@ -137,12 +139,12 @@ export default function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-white text-neutral-800">
-                <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+                <DropdownMenuLabel>{t('common.myAccount')}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-neutral-700 hover:text-neutral-900 cursor-pointer">Perfil</DropdownMenuItem>
-                <DropdownMenuItem className="text-neutral-700 hover:text-neutral-900 cursor-pointer">Configuración</DropdownMenuItem>
+                <DropdownMenuItem className="text-neutral-700 hover:text-neutral-900 cursor-pointer">{t('common.profile')}</DropdownMenuItem>
+                <DropdownMenuItem className="text-neutral-700 hover:text-neutral-900 cursor-pointer">{t('common.settings')}</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer">Cerrar Sesión</DropdownMenuItem>
+                <DropdownMenuItem onClick={logout} className="text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer">{t('common.logout')}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -169,26 +171,26 @@ export default function Header() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="flex flex-col items-center justify-center h-auto py-1 px-2 text-neutral-700">
               <span className="text-current"><ChevronDown size={20} /></span>
-              <span className="text-xs font-medium mt-1">Más</span>
+              <span className="text-xs font-medium mt-1">{t('common.more')}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <Link href="/cities">
               <DropdownMenuItem className="cursor-pointer">
                 <MapPin size={18} className="mr-2" />
-                <span>Ciudades</span>
+                <span>{t('common.cities')}</span>
               </DropdownMenuItem>
             </Link>
             <Link href="/buildings">
               <DropdownMenuItem className="cursor-pointer">
                 <Building size={18} className="mr-2" />
-                <span>Edificios</span>
+                <span>{t('common.buildings')}</span>
               </DropdownMenuItem>
             </Link>
             <Link href="/apartments">
               <DropdownMenuItem className="cursor-pointer">
                 <HomeIcon size={18} className="mr-2" />
-                <span>Apartamentos</span>
+                <span>{t('common.apartments')}</span>
               </DropdownMenuItem>
             </Link>
           </DropdownMenuContent>

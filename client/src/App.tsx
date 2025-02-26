@@ -2,6 +2,7 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthContext";
+import { TranslationProvider } from "./contexts/TranslationContext";
 import { Toaster } from "@/components/ui/toaster";
 
 // Layout components
@@ -119,8 +120,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router />
-        <Toaster />
+        <TranslationProvider>
+          <Router />
+          <Toaster />
+        </TranslationProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
