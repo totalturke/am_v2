@@ -175,10 +175,10 @@ export default function MaintenanceTasksTable({ tasks, onAddTask }: MaintenanceT
                       <span>
                         {task.apartment?.apartmentNumber && task.apartment.building?.name
                           ? `Apt ${task.apartment.apartmentNumber}, ${task.apartment.building.name}`
-                          : "Unknown"}
+                          : "Desconocido"}
                       </span>
                       <span className="text-xs text-neutral-500">
-                        {task.apartment?.building?.city?.name || "Unknown"}
+                        {task.apartment?.building?.city?.name || "Desconocida"}
                       </span>
                     </div>
                   </TableCell>
@@ -194,7 +194,7 @@ export default function MaintenanceTasksTable({ tasks, onAddTask }: MaintenanceT
                         <span>{task.assignedUser.name}</span>
                       </div>
                     ) : (
-                      <span className="text-neutral-500 italic">Unassigned</span>
+                      <span className="text-neutral-500 italic">Sin asignar</span>
                     )}
                   </TableCell>
                   <TableCell className="text-sm">{getStatusBadge(task.status)}</TableCell>
@@ -212,7 +212,7 @@ export default function MaintenanceTasksTable({ tasks, onAddTask }: MaintenanceT
                       }}
                     >
                       <Info className="h-4 w-4" />
-                      <span className="sr-only">View</span>
+                      <span className="sr-only">Ver</span>
                     </Button>
                     <Button 
                       variant="ghost" 
@@ -224,7 +224,7 @@ export default function MaintenanceTasksTable({ tasks, onAddTask }: MaintenanceT
                       }}
                     >
                       <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Edit</span>
+                      <span className="sr-only">Editar</span>
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -233,7 +233,7 @@ export default function MaintenanceTasksTable({ tasks, onAddTask }: MaintenanceT
               {filteredTasks.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-4 text-neutral-500">
-                    No tasks found matching the selected filters
+                    No se encontraron tareas que coincidan con los filtros seleccionados
                   </TableCell>
                 </TableRow>
               )}
@@ -245,7 +245,7 @@ export default function MaintenanceTasksTable({ tasks, onAddTask }: MaintenanceT
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-neutral-700">
-                Showing <span className="font-medium">1</span> to <span className="font-medium">5</span> of <span className="font-medium">{filteredTasks.length}</span> results
+                Mostrando <span className="font-medium">1</span> a <span className="font-medium">5</span> de <span className="font-medium">{filteredTasks.length}</span> resultados
               </p>
             </div>
             <Pagination>
