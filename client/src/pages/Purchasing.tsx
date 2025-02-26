@@ -236,10 +236,10 @@ export default function Purchasing() {
     <AppLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
-          <h1 className="text-2xl font-bold">Purchasing</h1>
+          <h1 className="text-2xl font-bold">Compras</h1>
           <Button onClick={() => setIsCreatingPO(true)} className="flex items-center gap-1">
             <ShoppingCart className="h-4 w-4" />
-            New Purchase Order
+            Nueva Orden de Compra
           </Button>
         </div>
 
@@ -374,7 +374,11 @@ export default function Purchasing() {
                 {getStatusBadge(selectedPO.status)}
               </div>
               <CardDescription>
-                Created on {format(new Date(selectedPO.createdAt), "MMMM d, yyyy")} by {selectedPO.createdByUser?.name}
+                {selectedPO.createdAt ? 
+                  `Creada el ${format(new Date(selectedPO.createdAt), "d MMMM, yyyy")} por ${selectedPO.createdByUser?.name || 'Usuario desconocido'}` 
+                  : 
+                  `Creada por ${selectedPO.createdByUser?.name || 'Usuario desconocido'}`
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
