@@ -46,7 +46,7 @@ const upload = multer({
   },
 });
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express, dbInfo: any): Promise<Server> {
   // Set up debug routes
   setupDebugRoutes(app);
   
