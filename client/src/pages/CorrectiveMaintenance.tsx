@@ -122,7 +122,7 @@ export default function CorrectiveMaintenance() {
   };
 
   return (
-    <AppLayout>
+    <>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
           <h1 className="text-2xl font-bold">Corrective Maintenance</h1>
@@ -324,6 +324,6 @@ export default function CorrectiveMaintenance() {
           onClose={() => setIsAddingTask(false)}
         />
       )}
-    </AppLayout>
+    </>
   );
 }

@@ -103,7 +103,7 @@ export default function Cities() {
   };
 
   return (
-    <AppLayout>
+    <>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
           <h1 className="text-2xl font-bold">Cities</h1>
@@ -258,6 +258,6 @@ export default function Cities() {
           </Form>
         </DialogContent>
       </Dialog>
-    </AppLayout>
+    </>
   );
 }
