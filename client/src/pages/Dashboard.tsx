@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { AppLayout } from "../App";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/contexts/TranslationContext";
@@ -39,7 +38,7 @@ export default function Dashboard() {
   };
 
   return (
-    <AppLayout>
+    <>
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -71,6 +70,6 @@ export default function Dashboard() {
           )}
         </>
       )}
-    </AppLayout>
+    </>
   );
 }
