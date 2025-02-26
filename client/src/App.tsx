@@ -16,6 +16,7 @@ import Purchasing from "./pages/Purchasing";
 import Cities from "./pages/Cities";
 import Buildings from "./pages/Buildings";
 import Apartments from "./pages/Apartments";
+import ApartmentDetails from "./pages/ApartmentDetails";
 import NotFound from "@/pages/not-found";
 import Login from "./pages/Login";
 
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/cities" component={Cities} />
       <Route path="/buildings" component={Buildings} />
       <Route path="/apartments" component={Apartments} />
+      <Route path="/apartments/:id" component={ApartmentDetails} />
       <Route component={NotFound} />
     </Switch>
   );
