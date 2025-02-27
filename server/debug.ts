@@ -1,10 +1,11 @@
 // Debug utility to check database data
-import express, { Request, Response } from 'express';
-import { storage } from './storage';
-import { Express } from 'express';
-import fs from 'fs';
+import { Express, Request, Response } from 'express';
 import path from 'path';
-import { DB } from './db';
+import { storage } from './storage.js';
+import fs from 'fs';
+import os from 'os';
+import util from 'util';
+import { DB } from './db.js';
 
 // Utility logging function
 function log(message: string) {
@@ -12,225 +13,140 @@ function log(message: string) {
   console.log(`${timestamp} [express] ${message}`);
 }
 
-export function setupDebugRoutes(app: Express, dbInfo: DB) {
-  // Only include debug routes in development or when explicitly allowed
-  if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_DEBUG_ROUTES === 'true') {
-    
-    // Endpoint to get all storage data for debugging
-    app.get('/api/debug/data', async (req: Request, res: Response) => {
-      try {
-        const users = await storage.getUsers();
-        const cities = await storage.getCities();
-        const buildings = await storage.getBuildings();
-        const apartments = await storage.getApartments();
-        const tasks = await storage.getTasks();
-        
-        // Get expanded apartment data
-        const expandedApartments = await Promise.all(apartments.map(async (apartment) => {
-          const building = await storage.getBuilding(apartment.buildingId);
-          let city;
-          if (building) {
-            city = await storage.getCity(building.cityId);
-          }
-          
-          return {
-            ...apartment,
-            building,
-            city
-          };
-        }));
-        
-        res.json({
-          users,
-          cities,
-          buildings,
-          apartments,
-          expandedApartments,
-          tasks
-        });
-      } catch (error) {
-        log('Debug API error:');
-        console.error(error);
-        res.status(500).json({ message: "Error retrieving debug data" });
-      }
-    });
-    
-    // Endpoint to reinitialize the database with test data
-    app.post('/api/debug/reset', async (req: Request, res: Response) => {
-      try {
-        // Reset the database
-        await (storage as any).resetData();
-        
-        res.json({ message: "Database reset successfully" });
-      } catch (error) {
-        log('Database reset error:');
-        console.error(error);
-        res.status(500).json({ message: "Error resetting database" });
-      }
-    });
-    
-    // Basic health check endpoint
-    app.get('/api/debug/health', (req, res) => {
-      res.json({
-        status: 'ok',
-        environment: process.env.NODE_ENV || 'development',
-        railway: process.env.RAILWAY_ENVIRONMENT ? true : false,
-        timestamp: new Date().toISOString()
-      });
-    });
-
-    // System info endpoint
-    app.get('/api/debug/system', (req, res) => {
-      const env = { ...process.env };
+export async function setupDebugRoutes(app: Express) {
+  if (process.env.ENABLE_DEBUG_ROUTES === 'true') {
+    app.get('/debug', async (req: Request, res: Response) => {
+      const startTime = Date.now();
       
-      // Redact sensitive info
-      delete env.PATH;
-      delete env.HOME;
+      // Basic system info
+      const systemInfo = {
+        hostname: os.hostname(),
+        platform: os.platform(),
+        arch: os.arch(),
+        release: os.release(),
+        uptime: os.uptime(),
+        loadAvg: os.loadavg(),
+        totalmem: os.totalmem(),
+        freemem: os.freemem(),
+        cpus: os.cpus().length,
+      };
       
-      res.json({
-        environment: process.env.NODE_ENV || 'development',
-        nodeVersion: process.version,
-        platform: process.platform,
+      // Environment variables (filtered for security)
+      const envVars = {
+        NODE_ENV: process.env.NODE_ENV,
+        PORT: process.env.PORT,
+        DATABASE_URL: process.env.DATABASE_URL ? '[REDACTED]' : undefined,
+        RAILWAY_ENVIRONMENT: process.env.RAILWAY_ENVIRONMENT,
+        RAILWAY_PROJECT_ID: process.env.RAILWAY_PROJECT_ID,
+      };
+      
+      // Process info
+      const processInfo = {
+        pid: process.pid,
+        ppid: process.ppid,
+        title: process.title,
+        version: process.version,
+        versions: process.versions,
         arch: process.arch,
-        uptime: process.uptime(),
-        memoryUsage: process.memoryUsage(),
+        platform: process.platform,
+        argv: process.argv,
+        execPath: process.execPath,
+        execArgv: process.execArgv,
         cwd: process.cwd(),
-        railway: process.env.RAILWAY_ENVIRONMENT ? true : false,
-        env: env
+        memoryUsage: process.memoryUsage(),
+      };
+      
+      // Important paths
+      const pathInfo = {
+        cwd: process.cwd(),
+        __dirname: path.resolve(),
+        homedir: os.homedir(),
+        tmpdir: os.tmpdir(),
+      };
+      
+      // Database connection test
+      let connectionTest: { 
+        success: boolean; 
+        error: string | null;
+        userCount?: number;
+      } = { 
+        success: false, 
+        error: null 
+      };
+      
+      try {
+        const result = await DB.db.select({
+          count: DB.sql<number>`count(*)`
+        }).from(DB.schema.users);
+        
+        connectionTest = { 
+          success: true, 
+          error: null,
+          userCount: result.length > 0 ? result[0].count : 0
+        };
+      } catch (error: any) {
+        connectionTest = { success: false, error: error.message };
+      }
+      
+      // Database file information
+      const dbInfo: {
+        dbPath: string | null;
+        exists: boolean;
+        dataDir: string | null;
+        dataDirExists: boolean | null;
+        dataDirContents: string[] | null;
+        dbFileSize: number | null;
+      } = {
+        dbPath: DB.dbPath || null,
+        exists: DB.dbPath ? fs.existsSync(DB.dbPath) : false,
+        dataDir: null,
+        dataDirExists: null,
+        dataDirContents: null,
+        dbFileSize: null
+      };
+      
+      // Additional database file diagnostics
+      if (DB.dbPath && fs.existsSync(DB.dbPath)) {
+        try {
+          dbInfo.dataDir = path.dirname(DB.dbPath);
+          dbInfo.dataDirExists = fs.existsSync(dbInfo.dataDir);
+          
+          if (dbInfo.dataDirExists) {
+            dbInfo.dataDirContents = fs.readdirSync(dbInfo.dataDir);
+          }
+          
+          const stats = fs.statSync(DB.dbPath);
+          dbInfo.dbFileSize = stats.size;
+        } catch (error: any) {
+          console.error('Error getting DB file info:', error);
+        }
+      }
+      
+      // Storage diagnostics
+      const storageInfo = {
+        type: storage.constructor.name,
+        users: await storage.getUsers().then(users => users.length).catch(() => 'error'),
+        cities: await storage.getCities().then(cities => cities.length).catch(() => 'error'),
+        buildings: await storage.getBuildings().then(buildings => buildings.length).catch(() => 'error'),
+        apartments: await storage.getApartments().then(apartments => apartments.length).catch(() => 'error'),
+        tasks: await storage.getTasks().then(tasks => tasks.length).catch(() => 'error')
+      };
+      
+      const endTime = Date.now();
+      
+      res.json({
+        timestamp: new Date().toISOString(),
+        executionTime: `${endTime - startTime}ms`,
+        systemInfo,
+        envVars,
+        processInfo,
+        pathInfo,
+        dbInfo,
+        connectionTest,
+        storageInfo
       });
     });
     
-    // Database connection test
-    app.get('/api/debug/database', async (req, res) => {
-      try {
-        // Check database info
-        const info = {
-          inMemory: dbInfo.useMemory || false,
-          location: 'unknown'
-        };
-        
-        // Try to run a simple query to verify the connection
-        let connectionTest = { success: false, error: null };
-        try {
-          const result = await dbInfo.db.select({ count: dbInfo.schema.users.id.count() }).from(dbInfo.schema.users);
-          connectionTest = { 
-            success: true, 
-            userCount: result[0].count,
-            error: null 
-          };
-        } catch (error) {
-          connectionTest = { success: false, error: error.message };
-        }
-        
-        // Check SQLite database path if we're using SQLite
-        let dbPath = null;
-        let dbFileExists = false;
-        let dbFileSize = null;
-        let dataDir = null;
-        let dataDirExists = false;
-        let dataDirContents = [];
-        
-        if (dbInfo.sqlite) {
-          try {
-            dbPath = dbInfo.sqlite.name;
-            if (dbPath) {
-              dataDir = path.dirname(dbPath);
-              dataDirExists = fs.existsSync(dataDir);
-              
-              if (dataDirExists) {
-                dataDirContents = fs.readdirSync(dataDir);
-              }
-              
-              dbFileExists = fs.existsSync(dbPath);
-              if (dbFileExists) {
-                const stats = fs.statSync(dbPath);
-                dbFileSize = stats.size;
-              }
-            }
-          } catch (error) {
-            log('Error checking database file:');
-            console.error(error);
-          }
-        }
-        
-        res.json({
-          databaseInfo: info,
-          connectionTest,
-          fileSystem: {
-            dbPath,
-            dbFileExists,
-            dbFileSize,
-            dataDir,
-            dataDirExists,
-            dataDirContents
-          }
-        });
-      } catch (error) {
-        res.status(500).json({ 
-          error: 'Database connection test failed',
-          message: error.message,
-          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        });
-      }
-    });
-    
-    // File system check
-    app.get('/api/debug/files', (req, res) => {
-      try {
-        const rootDir = process.cwd();
-        const dataDir = process.env.RAILWAY_ENVIRONMENT 
-          ? '/data' 
-          : path.resolve(process.cwd(), 'data');
-          
-        const checkDir = (dir: string) => {
-          const result = {
-            path: dir,
-            exists: false,
-            isDirectory: false,
-            readable: false,
-            writable: false,
-            contents: [],
-            error: null
-          };
-          
-          try {
-            result.exists = fs.existsSync(dir);
-            if (result.exists) {
-              const stats = fs.statSync(dir);
-              result.isDirectory = stats.isDirectory();
-              
-              try {
-                fs.accessSync(dir, fs.constants.R_OK);
-                result.readable = true;
-              } catch (e) {}
-              
-              try {
-                fs.accessSync(dir, fs.constants.W_OK);
-                result.writable = true;
-              } catch (e) {}
-              
-              if (result.isDirectory && result.readable) {
-                result.contents = fs.readdirSync(dir);
-              }
-            }
-          } catch (error) {
-            result.error = error.message;
-          }
-          
-          return result;
-        };
-        
-        res.json({
-          root: checkDir(rootDir),
-          data: checkDir(dataDir),
-          railway: process.env.RAILWAY_ENVIRONMENT ? true : false
-        });
-      } catch (error) {
-        res.status(500).json({ 
-          error: 'File system check failed',
-          message: error.message
-        });
-      }
-    });
+    console.log('Debug routes enabled');
   }
 }
