@@ -22,7 +22,11 @@ import { setupDebugRoutes } from "./debug";
 const upload = multer({
   storage: multer.diskStorage({
     destination: function (req, file, cb) {
-      const uploadDir = path.join(__dirname, "../uploads");
+      // For production (like Railway), use a temp directory that's writable
+      const uploadDir = process.env.NODE_ENV === 'production' 
+        ? path.join(process.cwd(), 'tmp', 'uploads')
+        : path.join(__dirname, "../uploads");
+        
       // Create uploads directory if it doesn't exist
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
@@ -47,6 +51,17 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express, dbInfo: any): Promise<Server> {
+  // Add a health check endpoint for monitoring
+  app.get("/health", (req: Request, res: Response) => {
+    res.status(200).json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || "development",
+      memory: process.memoryUsage(),
+      uptime: process.uptime()
+    });
+  });
+  
   // Set up debug routes
   setupDebugRoutes(app);
   

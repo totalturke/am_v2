@@ -38,36 +38,53 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Setup database connection
-  const dbInfo = await setupDatabase();
-  log(`Database setup complete. Using ${dbInfo.useMemory ? "in-memory storage" : "PostgreSQL database"}`);
-  
-  const server = await registerRoutes(app, dbInfo);
+  try {
+    log(`Starting server in ${process.env.NODE_ENV || 'development'} mode`);
+    log(`Current working directory: ${process.cwd()}`);
+    
+    // Setup database connection
+    const dbInfo = await setupDatabase();
+    log(`Database setup complete. Using ${dbInfo.useMemory ? "in-memory storage" : "PostgreSQL database"}`);
+    
+    const server = await registerRoutes(app, dbInfo);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
+      
+      log(`ERROR: ${status} - ${message}`);
+      if (err.stack) {
+        log(`Stack trace: ${err.stack}`);
+      }
 
-    res.status(status).json({ message });
-    throw err;
-  });
+      res.status(status).json({ message });
+    });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+    // importantly only setup vite in development and after
+    // setting up all the other routes so the catch-all route
+    // doesn't interfere with the other routes
+    if (process.env.NODE_ENV === "development") {
+      log('Setting up Vite for development mode');
+      await setupVite(app, server);
+    } else {
+      log('Setting up static file serving for production mode');
+      serveStatic(app);
+    }
+
+    // Use PORT environment variable if available, otherwise use 5000
+    const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
+    server.listen({
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    }, () => {
+      log(`Server started successfully and is listening on port ${port}`);
+    });
+  } catch (error) {
+    log(`Fatal error during server startup: ${error}`);
+    if (error instanceof Error) {
+      log(`Error stack: ${error.stack}`);
+    }
+    process.exit(1);
   }
-
-  // Use PORT environment variable if available, otherwise use 5000
-  const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
 })();
