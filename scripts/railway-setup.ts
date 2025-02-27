@@ -1,55 +1,58 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
-import * as schema from '@shared/schema';
+/**
+ * Railway deployment setup script
+ * This script runs during the build process on Railway
+ * to ensure the database is properly initialized and seeded
+ */
 import path from 'path';
 import fs from 'fs';
-import { MemStorage, storage } from './storage';
+import Database from 'better-sqlite3';
+import { log } from '../server/vite';
 
-// Database setup function that checks for SQLite DB
-export async function setupDatabase() {
+// Initialize Railway database
+async function setupRailwayDatabase() {
   try {
-    console.log("Setting up SQLite database...");
+    log('Setting up Railway database...');
     
     // Data directory path - use /data for Railway persistence
-    const dataDir = process.env.RAILWAY_ENVIRONMENT 
-      ? '/data' 
-      : path.resolve(process.cwd(), 'data');
+    const dataDir = '/data';
     
-    // Ensure data directory exists if not in Railway (Railway's /data already exists)
-    if (!process.env.RAILWAY_ENVIRONMENT && !fs.existsSync(dataDir)) {
-      console.log(`Creating data directory: ${dataDir}`);
-      fs.mkdirSync(dataDir, { recursive: true });
+    // Check if /data exists on Railway
+    if (!fs.existsSync(dataDir)) {
+      log('WARNING: Data directory not found on Railway');
+      return;
     }
     
     // Database file path
     const dbPath = path.join(dataDir, 'sqlite.db');
-    console.log(`Using SQLite database at: ${dbPath}`);
     
-    // Check if database file exists, if not initialize it
+    // Check if database file already exists
     const dbExists = fs.existsSync(dbPath);
+    if (dbExists) {
+      log('Database already exists, skipping initialization');
+      return;
+    }
+    
+    log(`Creating new database at: ${dbPath}`);
     
     // Initialize the database connection
     const sqlite = new Database(dbPath);
     
-    // Enable foreign keys
+    // Enable WAL mode and foreign keys
     sqlite.pragma('journal_mode = WAL');
     sqlite.pragma('foreign_keys = ON');
     
-    // Create the Drizzle client
-    const db = drizzle(sqlite, { schema });
+    // Create the schema
+    log('Initializing database schema...');
+    initializeSchema(sqlite);
     
-    // If database was just created, initialize the schema
-    if (!dbExists) {
-      console.log("Database file not found. Initializing schema...");
-      initializeSchema(sqlite);
-    }
+    // Seed with initial data
+    log('Seeding database with initial data...');
+    seedDatabase(sqlite);
     
-    console.log("SQLite database connection successful");
-    return { db, sqlite, useMemory: false };
+    log('Railway database setup completed successfully');
   } catch (error) {
-    console.error("Failed to connect to SQLite database:", error);
-    console.warn("Falling back to in-memory storage");
-    return { useMemory: true, storage };
+    log(`Error setting up Railway database: ${error}`);
+    process.exit(1);
   }
 }
 
@@ -164,20 +167,65 @@ function initializeSchema(sqlite: Database.Database) {
       );
     `);
     
-    console.log("Database schema created successfully!");
-    
-    // Add default admin user if none exists
+    log('Database schema created successfully');
+  } catch (error) {
+    log(`Error initializing database schema: ${error}`);
+    throw error;
+  }
+}
+
+// Seed database with initial data
+function seedDatabase(sqlite: Database.Database) {
+  try {
+    // Add default admin user
     sqlite.exec(`
       INSERT OR IGNORE INTO users (username, password, name, role) 
       VALUES ('admin', 'admin123', 'System Administrator', 'control_center');
     `);
     
-    console.log("Added default admin user");
+    // Add sample cities
+    sqlite.exec(`
+      INSERT OR IGNORE INTO cities (name, state, country) VALUES 
+      ('Ciudad de México', 'CDMX', 'Mexico'),
+      ('Guadalajara', 'Jalisco', 'Mexico'),
+      ('Monterrey', 'Nuevo León', 'Mexico');
+    `);
+    
+    // Add sample buildings
+    sqlite.exec(`
+      INSERT OR IGNORE INTO buildings (name, address, city_id, total_units) VALUES
+      ('Edificio Central', 'Av. Reforma 123', 1, 20),
+      ('Torre Norte', 'Calle Álamo 45', 2, 15);
+    `);
+    
+    // Add sample apartments
+    sqlite.exec(`
+      INSERT OR IGNORE INTO apartments (apartment_number, building_id, bedroom_count, bathroom_count, square_meters) VALUES
+      ('101', 1, 2, 1, 75),
+      ('102', 1, 3, 2, 95),
+      ('201', 1, 1, 1, 55),
+      ('101', 2, 2, 2, 80),
+      ('102', 2, 3, 2, 100);
+    `);
+    
+    // Add sample materials
+    sqlite.exec(`
+      INSERT OR IGNORE INTO materials (name, quantity, unit, notes) VALUES
+      ('Pintura blanca', 25, 'liters', 'Marca Sayer'),
+      ('Focos LED', 50, 'pieces', '9W equivalente a 60W'),
+      ('Tornillos 1 pulgada', 200, 'pieces', 'Caja de 200 unidades');
+    `);
+    
+    log('Database seeded successfully');
   } catch (error) {
-    console.error(`Error initializing database schema: ${error}`);
+    log(`Error seeding database: ${error}`);
     throw error;
   }
 }
 
-// Export the memory storage for use when SQLite is not available
-export { storage };
+// Run setup if this is on Railway
+if (process.env.RAILWAY_ENVIRONMENT) {
+  setupRailwayDatabase();
+} else {
+  log('Not running on Railway, skipping Railway-specific setup');
+}

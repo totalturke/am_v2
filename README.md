@@ -1,69 +1,98 @@
-# Apartment Master
+# Apartment Management System
 
-A comprehensive apartment management system for property managers, maintenance staff, and purchasing agents.
+A comprehensive application for managing apartment buildings, units, maintenance tasks, and inventory.
 
 ## Features
 
-- Dashboard with key metrics and task status
-- Apartment and building management
-- Maintenance task tracking
+- User management with role-based access control
+- Building and apartment unit management
+- Maintenance task tracking and assignment
 - Material inventory management
 - Purchase order system
-- User role-based access control
+- Responsive UI for mobile and desktop
 
-## Tech Stack
+## Technology Stack
 
-- Frontend: React, Tailwind CSS, Shadcn UI
-- Backend: Node.js, Express
-- Database: SQLite via Drizzle ORM (with in-memory fallback)
+- **Frontend**: React, TypeScript, Vite
+- **Backend**: Node.js, Express
+- **Database**: SQLite (with Drizzle ORM)
+- **Deployment**: Railway
 
-## Development
+## Local Development
 
-```bash
-# Install dependencies
-npm install
+1. Clone the repository
+   ```bash
+   git clone https://github.com/yourusername/apartment-management.git
+   cd apartment-management
+   ```
 
-# Run in development mode
-npm run dev
+2. Install dependencies
+   ```bash
+   npm install
+   ```
 
-# Initialize and seed the SQLite database manually
-npm run db:setup
-```
+3. Set up the database
+   ```bash
+   npm run db:setup
+   ```
+
+4. Start development server
+   ```bash
+   npm run dev
+   ```
+
+5. Open your browser to http://localhost:5000
 
 ## Deployment to Railway
 
+The application is configured for easy deployment to [Railway](https://railway.app/).
+
+### Prerequisites
+
+1. Create a Railway account
+2. Install Railway CLI (optional but recommended)
+   ```bash
+   npm i -g @railway/cli
+   ```
+
+### Deployment Steps
+
 1. Create a new Railway project
-2. Connect your GitHub repository
-3. Set environment variables:
-   - `PORT`: Set by Railway automatically
-   - `NODE_ENV`: "production" (set in Procfile)
+   ```bash
+   railway init
+   ```
 
-No external database service is required - the application uses SQLite which stores data in a file within the application's file system.
+2. Link your local repository to the Railway project
+   ```bash
+   railway link
+   ```
 
-## Database Management
+3. Push your code to deploy
+   ```bash
+   railway up
+   ```
 
-The application uses SQLite for data persistence, which stores all data in a single file at `./data/sqlite.db`:
+4. Deploy manually through the Railway dashboard
+   - Connect your GitHub repository
+   - Railway will automatically detect the Procfile and build scripts
+   - The app will be built and deployed
 
-- `npm run db:init`: Create the database schema
-- `npm run db:seed`: Populate the database with sample data 
-- `npm run db:setup`: Run both init and seed commands
+### Environment Variables
 
-## Environment Variables
+The following environment variables can be configured in Railway:
 
-- `PORT`: Port for the server to listen on (defaults to 5000)
-- `NODE_ENV`: Environment mode (development or production)
-- `USE_MEMORY_STORAGE`: Set to 'true' to use in-memory storage instead of SQLite (for testing)
+- `NODE_ENV`: Set to `production` for deployment
+- `PORT`: Automatically set by Railway
+- `RAILWAY_ENVIRONMENT`: Set to `production` (automatically set by Railway)
 
-## Debugging
+### Database Persistence
 
-The application includes debugging endpoints for development:
+Railway provides a persistent volume mounted at `/data`. The application is configured to automatically use this location for the SQLite database file.
 
-- `/api/debug/data`: Shows all data in the storage
-- `/api/debug/reset`: Resets and reinitializes the data
+## Default Login Credentials
 
-## Health Check
-
-- `/health`: Returns application health status and diagnostics
+- Username: `admin`
+- Password: `admin123`
 
 ## License
 
