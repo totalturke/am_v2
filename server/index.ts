@@ -1,8 +1,9 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, serveStatic } from "./vite";
 import { setupDatabase } from "./db";
 import cors from 'cors';
+import { log } from "./debug";
 
 const app = express();
 
@@ -30,6 +31,10 @@ const app = express();
       app.use(cors());
     }
     
+    // Enable debug routes (available in development or when ENABLE_DEBUG_ROUTES is set)
+    const { setupDebugRoutes } = await import("./debug");
+    setupDebugRoutes(app, dbInfo);
+
     app.use((req, res, next) => {
       const start = Date.now();
       const path = req.path;
