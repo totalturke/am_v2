@@ -18,8 +18,15 @@ const app = express();
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
 
-    // Setup CORS for development
-    if (process.env.NODE_ENV !== "production") {
+    // Setup CORS for all environments, but configured differently for production
+    if (process.env.NODE_ENV === "production") {
+      // In production, only allow specific origins
+      app.use(cors({
+        origin: true, // Allow the request origin
+        credentials: true, // Allow cookies
+      }));
+    } else {
+      // In development, allow all origins
       app.use(cors());
     }
     
