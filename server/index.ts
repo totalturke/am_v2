@@ -36,9 +36,16 @@ const app = express();
       app.use(cors());
     }
     
-    // Enable debug routes (available in development or when ENABLE_DEBUG_ROUTES is set)
-    const { setupDebugRoutes } = await import("./debug");
-    setupDebugRoutes(app, dbInfo);
+    // Setup debug routes with try-catch to prevent dependency errors
+    try {
+      const debugModule = require("./debug");
+      if (typeof debugModule.setupDebugRoutes === 'function') {
+        debugModule.setupDebugRoutes(app, dbInfo);
+        log("Debug routes initialized successfully");
+      }
+    } catch (error) {
+      log(`Warning: Debug routes setup failed: ${error.message}`);
+    }
 
     app.use((req, res, next) => {
       const start = Date.now();
