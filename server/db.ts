@@ -1,69 +1,44 @@
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import Database from 'better-sqlite3';
 import * as schema from '@shared/schema';
+import path from 'path';
+import fs from 'fs';
 import { MemStorage, storage } from './storage';
 
-// Database setup function that checks for DATABASE_URL
+// Database setup function that checks for SQLite DB
 export async function setupDatabase() {
-  if (process.env.DATABASE_URL) {
-    try {
-      console.log("Connecting to PostgreSQL database...");
-      
-      // Add connection retry logic
-      let sql;
-      let retries = 5;
-      
-      while (retries > 0) {
-        try {
-          // Setup PostgreSQL connection
-          sql = neon(process.env.DATABASE_URL);
-          // Test connection with timeout
-          const result = await Promise.race([
-            sql`SELECT NOW()`,
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Database connection timeout')), 10000)
-            )
-          ]);
-          
-          console.log("Database connection successful:", result);
-          break;
-        } catch (err) {
-          retries--;
-          if (retries === 0) throw err;
-          
-          console.log(`Database connection failed, retrying... (${retries} attempts left)`);
-          // Wait before retrying (exponential backoff)
-          await new Promise(resolve => setTimeout(resolve, (5 - retries) * 1000));
-        }
-      }
-      
-      if (!sql) throw new Error("Failed to establish database connection after retries");
-      
-      const db = drizzle(sql, { schema });
-      return { db, useMemory: false };
-    } catch (error) {
-      console.error("Failed to connect to PostgreSQL database:", error);
-      
-      if (process.env.NODE_ENV === 'production') {
-        console.error("DATABASE CONNECTION FAILURE IN PRODUCTION MODE");
-        console.error("This is a critical error that should be addressed immediately.");
-        console.error("Check your DATABASE_URL environment variable in Railway.");
-        
-        // In production, we might want to exit instead of fallback
-        if (process.env.FORCE_EXIT_ON_DB_FAILURE === 'true') {
-          console.error("Exiting due to FORCE_EXIT_ON_DB_FAILURE=true");
-          process.exit(1);
-        }
-      }
-      
-      console.warn("Falling back to in-memory storage");
-      return { useMemory: true, storage };
+  try {
+    console.log("Setting up SQLite database...");
+    
+    // Ensure data directory exists
+    const dataDir = path.resolve(process.cwd(), 'data');
+    if (!fs.existsSync(dataDir)) {
+      console.log(`Creating data directory: ${dataDir}`);
+      fs.mkdirSync(dataDir, { recursive: true });
     }
-  } else {
-    console.log("No DATABASE_URL provided, using in-memory storage");
+    
+    // Use the SQLite database file path
+    const dbPath = path.resolve(dataDir, 'sqlite.db');
+    console.log(`Using SQLite database at: ${dbPath}`);
+    
+    // Initialize the database connection
+    const sqlite = new Database(dbPath);
+    
+    // Enable foreign keys
+    sqlite.pragma('journal_mode = WAL');
+    sqlite.pragma('foreign_keys = ON');
+    
+    // Create the Drizzle client
+    const db = drizzle(sqlite, { schema });
+    
+    console.log("SQLite database connection successful");
+    return { db, sqlite, useMemory: false };
+  } catch (error) {
+    console.error("Failed to connect to SQLite database:", error);
+    console.warn("Falling back to in-memory storage");
     return { useMemory: true, storage };
   }
 }
 
-// Export the memory storage for use when DATABASE_URL is not available
+// Export the memory storage for use when SQLite is not available
 export { storage };

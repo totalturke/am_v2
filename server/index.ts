@@ -43,8 +43,16 @@ app.use((req, res, next) => {
     log(`Current working directory: ${process.cwd()}`);
     
     // Setup database connection
-    const dbInfo = await setupDatabase();
-    log(`Database setup complete. Using ${dbInfo.useMemory ? "in-memory storage" : "PostgreSQL database"}`);
+    let dbInfo;
+    if (process.env.USE_MEMORY_STORAGE === 'true') {
+      log('Using in-memory storage as requested by USE_MEMORY_STORAGE=true');
+      dbInfo = { useMemory: true, storage: {} };
+    } else {
+      // Try to use SQLite
+      dbInfo = await setupDatabase();
+    }
+    
+    log(`Database setup complete. Using ${dbInfo.useMemory ? "in-memory storage" : "SQLite database"}`);
     
     const server = await registerRoutes(app, dbInfo);
 
@@ -72,13 +80,15 @@ app.use((req, res, next) => {
     }
 
     // Use PORT environment variable if available, otherwise use 5000
-    const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
+    const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5000;
+    const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
+
     server.listen({
-      port,
-      host: "0.0.0.0",
+      port: PORT,
+      host: HOST,
       reusePort: true,
     }, () => {
-      log(`Server started successfully and is listening on port ${port}`);
+      log(`Server started successfully and is listening on port ${PORT}`);
     });
   } catch (error) {
     log(`Fatal error during server startup: ${error}`);

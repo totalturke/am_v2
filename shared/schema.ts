@@ -1,10 +1,10 @@
-import { pgTable, text, serial, integer, boolean, timestamp, real, json } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, real, blob } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // User schema
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   name: text("name").notNull(),
@@ -19,8 +19,8 @@ export const insertUserSchema = createInsertSchema(users).omit({
 });
 
 // City schema
-export const cities = pgTable("cities", {
-  id: serial("id").primaryKey(),
+export const cities = sqliteTable("cities", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   state: text("state").notNull(),
   country: text("country").notNull().default("Mexico"),
@@ -31,8 +31,8 @@ export const insertCitySchema = createInsertSchema(cities).omit({
 });
 
 // Building schema
-export const buildings = pgTable("buildings", {
-  id: serial("id").primaryKey(),
+export const buildings = sqliteTable("buildings", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   address: text("address").notNull(),
   cityId: integer("city_id").notNull(),
@@ -44,13 +44,13 @@ export const insertBuildingSchema = createInsertSchema(buildings).omit({
 });
 
 // Apartment schema
-export const apartments = pgTable("apartments", {
-  id: serial("id").primaryKey(),
+export const apartments = sqliteTable("apartments", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   apartmentNumber: text("apartment_number").notNull(),
   buildingId: integer("building_id").notNull(),
   status: text("status").notNull().default("active"), // active, maintenance, inactive
-  lastMaintenance: timestamp("last_maintenance"),
-  nextMaintenance: timestamp("next_maintenance"),
+  lastMaintenance: text("last_maintenance"),
+  nextMaintenance: text("next_maintenance"),
   bedroomCount: integer("bedroom_count").notNull(),
   bathroomCount: integer("bathroom_count").notNull(),
   squareMeters: real("square_meters"),
@@ -63,24 +63,24 @@ export const insertApartmentSchema = createInsertSchema(apartments).omit({
 });
 
 // Task schema
-export const tasks = pgTable("tasks", {
-  id: serial("id").primaryKey(),
+export const tasks = sqliteTable("tasks", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   taskId: text("task_id").notNull().unique(), // MT-XXXX
   type: text("type").notNull(), // corrective, preventive
   apartmentId: integer("apartment_id").notNull(),
   issue: text("issue").notNull(),
   description: text("description"),
   reportedBy: text("reported_by"),
-  reportedAt: timestamp("reported_at").notNull().defaultNow(),
-  scheduledFor: timestamp("scheduled_for"),
+  reportedAt: text("reported_at").notNull().default("CURRENT_TIMESTAMP"),
+  scheduledFor: text("scheduled_for"),
   assignedTo: integer("assigned_to"),
   priority: text("priority").notNull().default("medium"), // low, medium, high
   status: text("status").notNull().default("pending"), // pending, in_progress, complete, verified
   estimatedDuration: text("estimated_duration"),
-  completedAt: timestamp("completed_at"),
+  completedAt: text("completed_at"),
   verifiedBy: integer("verified_by"),
-  verifiedAt: timestamp("verified_at"),
-  evidencePhotos: json("evidence_photos").default([]),
+  verifiedAt: text("verified_at"),
+  evidencePhotos: text("evidence_photos", { mode: "json" }).default("[]"),
 });
 
 export const insertTaskSchema = createInsertSchema(tasks).omit({
@@ -91,8 +91,8 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
 });
 
 // Material schema
-export const materials = pgTable("materials", {
-  id: serial("id").primaryKey(),
+export const materials = sqliteTable("materials", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   quantity: integer("quantity").notNull().default(0),
   unit: text("unit").notNull(), // each, kg, liter
@@ -104,8 +104,8 @@ export const insertMaterialSchema = createInsertSchema(materials).omit({
 });
 
 // Task Materials schema (for tracking materials needed for tasks)
-export const taskMaterials = pgTable("task_materials", {
-  id: serial("id").primaryKey(),
+export const taskMaterials = sqliteTable("task_materials", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   taskId: integer("task_id").notNull(),
   materialId: integer("material_id").notNull(),
   quantity: integer("quantity").notNull(),
@@ -117,11 +117,11 @@ export const insertTaskMaterialSchema = createInsertSchema(taskMaterials).omit({
 });
 
 // Purchase Order schema
-export const purchaseOrders = pgTable("purchase_orders", {
-  id: serial("id").primaryKey(),
+export const purchaseOrders = sqliteTable("purchase_orders", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   poNumber: text("po_number").notNull().unique(),
   createdBy: integer("created_by").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  createdAt: text("created_at").notNull().default("CURRENT_TIMESTAMP"),
   status: text("status").notNull().default("draft"), // draft, submitted, received
   totalAmount: real("total_amount"),
   notes: text("notes"),
@@ -133,8 +133,8 @@ export const insertPurchaseOrderSchema = createInsertSchema(purchaseOrders).omit
 });
 
 // Purchase Order Items schema
-export const purchaseOrderItems = pgTable("purchase_order_items", {
-  id: serial("id").primaryKey(),
+export const purchaseOrderItems = sqliteTable("purchase_order_items", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   purchaseOrderId: integer("purchase_order_id").notNull(),
   materialId: integer("material_id").notNull(),
   quantity: integer("quantity").notNull(),

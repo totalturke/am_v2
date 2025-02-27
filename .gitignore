@@ -5,3 +5,8 @@ server/public
 vite.config.ts.*
 *.tar.gz
 .env
+
+# SQLite database files
+/data/sqlite.db
+/data/sqlite.db-shm
+/data/sqlite.db-wal
