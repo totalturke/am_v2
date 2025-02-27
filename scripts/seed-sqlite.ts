@@ -3,8 +3,13 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import * as schema from '../shared/schema';
 
-// Use the SQLite database file path
-const dbPath = path.resolve(process.cwd(), 'data', 'sqlite.db');
+// Data directory path - use /data for Railway persistence
+const dataDir = process.env.RAILWAY_ENVIRONMENT 
+  ? '/data' 
+  : path.resolve(process.cwd(), 'data');
+
+// Database file path
+const dbPath = path.join(dataDir, 'sqlite.db');
 console.log(`Seeding SQLite database at: ${dbPath}`);
 
 // Initialize the database connection

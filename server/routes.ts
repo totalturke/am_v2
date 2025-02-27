@@ -51,14 +51,51 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express, dbInfo: any): Promise<Server> {
+  // Add a basic root route for Railway health checks
+  app.get("/", (req: Request, res: Response) => {
+    res.status(200).send("App is running");
+  });
+
   // Add a health check endpoint for monitoring
   app.get("/health", (req: Request, res: Response) => {
-    res.status(200).json({
-      status: "ok",
+    // Check database connectivity
+    let dbStatus = 'unknown';
+    let dbDetails = {};
+    
+    try {
+      if (dbInfo) {
+        // Execute a simple query to verify database connection
+        if (storage === 'sqlite') {
+          const result = dbInfo.select({ count: sql`count(*)` }).from(users).all();
+          dbStatus = 'connected';
+          dbDetails = { 
+            type: 'sqlite',
+            location: process.env.RAILWAY_ENVIRONMENT ? '/data/sqlite.db' : './data/sqlite.db',
+            userCount: result[0]?.count || 0
+          };
+        } else {
+          // Memory storage check
+          dbStatus = 'memory';
+          dbDetails = { type: 'memory' };
+        }
+      } else {
+        dbStatus = 'disconnected';
+      }
+    } catch (error) {
+      dbStatus = 'error';
+      dbDetails = { error: error.message };
+    }
+
+    // Return comprehensive health information
+    res.json({
+      status: "healthy",
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || "development",
-      memory: process.memoryUsage(),
-      uptime: process.uptime()
+      environment: process.env.NODE_ENV || 'development',
+      database: {
+        status: dbStatus,
+        details: dbDetails
+      },
+      uptime: Math.floor(process.uptime())
     });
   });
   

@@ -10,15 +10,19 @@ export async function setupDatabase() {
   try {
     console.log("Setting up SQLite database...");
     
-    // Ensure data directory exists
-    const dataDir = path.resolve(process.cwd(), 'data');
-    if (!fs.existsSync(dataDir)) {
+    // Data directory path - use /data for Railway persistence
+    const dataDir = process.env.RAILWAY_ENVIRONMENT 
+      ? '/data' 
+      : path.resolve(process.cwd(), 'data');
+    
+    // Ensure data directory exists if not in Railway (Railway's /data already exists)
+    if (!process.env.RAILWAY_ENVIRONMENT && !fs.existsSync(dataDir)) {
       console.log(`Creating data directory: ${dataDir}`);
       fs.mkdirSync(dataDir, { recursive: true });
     }
     
-    // Use the SQLite database file path
-    const dbPath = path.resolve(dataDir, 'sqlite.db');
+    // Database file path
+    const dbPath = path.join(dataDir, 'sqlite.db');
     console.log(`Using SQLite database at: ${dbPath}`);
     
     // Initialize the database connection
