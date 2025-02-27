@@ -1,14 +1,14 @@
 import { defineConfig } from "drizzle-kit";
-import { resolve } from "path";
 
-// Allow running without DATABASE_URL in development mode
-const databaseUrl = process.env.DATABASE_URL || "./data/sqlite.db";
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL, ensure the database is provisioned");
+}
 
 export default defineConfig({
   out: "./migrations",
   schema: "./shared/schema.ts",
-  dialect: "sqlite",
+  dialect: "postgresql",
   dbCredentials: {
-    url: databaseUrl,
+    url: process.env.DATABASE_URL,
   },
 });

@@ -1,0 +1,14 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm run build"
+
+[deploy]
+startCommand = "npm run debug:railway && npm start"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+[variables]
+NIXPACKS_NODE_VERSION = "18"
+PORT = 3000
+NODE_ENV = "production"
+ENABLE_DEBUG_ROUTES = "true"
