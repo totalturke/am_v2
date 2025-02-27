@@ -3,7 +3,12 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic } from "./vite";
 import { setupDatabase } from "./db";
 import cors from 'cors';
-import { log } from "./debug";
+
+// Utility logging function
+export function log(message: string) {
+  const timestamp = new Date().toISOString().split('T')[1].slice(0, 8);
+  console.log(`${timestamp} [express] ${message}`);
+}
 
 const app = express();
 

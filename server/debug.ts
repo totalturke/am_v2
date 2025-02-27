@@ -7,7 +7,7 @@ import path from 'path';
 import { DB } from './db';
 
 // Utility logging function
-export function log(message: string) {
+function log(message: string) {
   const timestamp = new Date().toISOString().split('T')[1].slice(0, 8);
   console.log(`${timestamp} [express] ${message}`);
 }
@@ -49,7 +49,8 @@ export function setupDebugRoutes(app: Express, dbInfo: DB) {
           tasks
         });
       } catch (error) {
-        console.error('Debug API error:', error);
+        log('Debug API error:');
+        console.error(error);
         res.status(500).json({ message: "Error retrieving debug data" });
       }
     });
@@ -62,7 +63,8 @@ export function setupDebugRoutes(app: Express, dbInfo: DB) {
         
         res.json({ message: "Database reset successfully" });
       } catch (error) {
-        console.error('Database reset error:', error);
+        log('Database reset error:');
+        console.error(error);
         res.status(500).json({ message: "Error resetting database" });
       }
     });
@@ -146,7 +148,8 @@ export function setupDebugRoutes(app: Express, dbInfo: DB) {
               }
             }
           } catch (error) {
-            console.error('Error checking database file:', error);
+            log('Error checking database file:');
+            console.error(error);
           }
         }
         
