@@ -12,7 +12,10 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "declaration": false,
-    "composite": false
+    "composite": false,
+    "noImplicitAny": false,
+    "strict": false,
+    "noEmitOnError": false
   },
   "include": [
     "server/**/*",

@@ -1,6 +1,6 @@
 /**
  * Server build script for ApartmentMaster 
- * This script compiles the server-side TypeScript code
+ * This script simply copies necessary files to the dist directory
  */
 import { execSync } from 'child_process';
 import path from 'path';
@@ -16,28 +16,42 @@ async function buildServer() {
       fs.mkdirSync(distDir, { recursive: true });
     }
     
-    // Use tsc directly instead of esbuild to avoid complex dependency issues
-    console.log('Compiling server TypeScript files...');
-    execSync('npx tsc --project tsconfig.server.json', { stdio: 'inherit' });
+    // Copy server files directly (we'll use ts-node in production)
+    console.log('Copying server files to dist...');
+    const serverFiles = [
+      'server',
+      'shared',
+      'scripts',
+      '.env',
+      'package.json',
+      'package-lock.json',
+      'tsconfig.json',
+      'tsconfig.server.json'
+    ];
     
-    // Copy package.json to dist for production dependencies
-    console.log('Copying necessary files to dist directory...');
-    
-    // Create a simplified package.json for production
-    const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-    const prodPkg = {
-      name: pkg.name,
-      version: pkg.version,
-      description: pkg.description,
-      main: 'index.js',
-      dependencies: {
-        'better-sqlite3': pkg.dependencies['better-sqlite3'],
-        'drizzle-orm': pkg.dependencies['drizzle-orm'],
-        'express': pkg.dependencies['express'],
-        'cors': pkg.dependencies['cors']
+    for (const file of serverFiles) {
+      const src = path.resolve(process.cwd(), file);
+      const dest = path.resolve(distDir, file);
+      
+      if (fs.existsSync(src)) {
+        if (fs.statSync(src).isDirectory()) {
+          console.log(`Copying directory: ${file}`);
+          execSync(`cp -R ${src} ${dest}`);
+        } else {
+          console.log(`Copying file: ${file}`);
+          fs.copyFileSync(src, dest);
+        }
       }
-    };
-    fs.writeFileSync(path.join(distDir, 'package.json'), JSON.stringify(prodPkg, null, 2));
+    }
+    
+    // Create a simple starter script
+    console.log('Creating starter script...');
+    fs.writeFileSync(
+      path.join(distDir, 'index.js'), 
+      `// Production starter script
+require('tsx/dist/cli').main(['', '', './server/index.ts']);
+`
+    );
     
     console.log('Server build completed successfully!');
   } catch (error) {
