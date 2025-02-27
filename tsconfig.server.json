@@ -1,31 +1,20 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "moduleResolution": "node",
+    "module": "Node16",
+    "moduleResolution": "Node16",
     "target": "ES2020",
-    "outDir": "dist",
+    "outDir": "dist/server",
     "rootDir": ".",
-    "esModuleInterop": true,
+    "paths": {
+      "@shared/*": ["./shared/*"]
+    },
     "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "sourceMap": true,
-    "declaration": false,
-    "composite": false,
-    "noImplicitAny": false,
-    "strict": false,
-    "noEmitOnError": false
+    "noImplicitAny": false
   },
-  "include": [
-    "server/**/*",
-    "shared/**/*",
-    "scripts/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "client",
-    "**/*.test.ts"
-  ]
+  "include": ["server/**/*.ts", "shared/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
