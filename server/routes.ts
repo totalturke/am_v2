@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
-import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { createServer } from "http";
+import { storage } from "./storage.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -45,7 +45,7 @@ const upload = multer({
   },
 });
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express): Promise<any> {
   // Auth routes
   app.post("/api/login", async (req: Request, res: Response) => {
     try {

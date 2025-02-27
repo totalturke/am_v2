@@ -8,7 +8,7 @@ import {
   taskMaterials, type TaskMaterial, type InsertTaskMaterial,
   purchaseOrders, type PurchaseOrder, type InsertPurchaseOrder,
   purchaseOrderItems, type PurchaseOrderItem, type InsertPurchaseOrderItem
-} from "@shared/schema";
+} from "../shared/schema.js";
 
 // Interface for storage operations
 export interface IStorage {
